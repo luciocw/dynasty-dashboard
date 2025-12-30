@@ -40,14 +40,19 @@
         .filter-btn:hover{border-color:var(--accent);color:var(--text-primary)}
         .filter-btn.active{background:var(--accent);border-color:var(--accent);color:white}
         .filter-btn .count{background:rgba(255,255,255,.2);padding:.125rem .5rem;border-radius:4px;margin-left:.5rem;font-size:.75rem}
-        .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:1.5rem}
-        .stat-card{background:var(--bg-secondary);border-radius:10px;padding:1rem;text-align:center;border:1px solid var(--border)}
-        .stat-value{font-size:1.6rem;font-weight:600;color:var(--accent)}
-        .stat-label{font-size:.75rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-top:.25rem}
+        .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1rem;margin-bottom:1.5rem}
+        .stat-card{background:var(--bg-secondary);border-radius:10px;padding:1rem;text-align:center;border:1px solid var(--border);cursor:pointer;transition:all .2s}
+        .stat-card:hover{border-color:var(--accent)}
+        .stat-card.active{border-color:var(--accent);background:var(--accent-muted)}
+        .stat-value{font-size:1.5rem;font-weight:600;color:var(--accent)}
+        .stat-label{font-size:.7rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-top:.25rem}
         .controls-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem}
-        .controls-right{display:flex;gap:.75rem;align-items:center}
-        .year-select{padding:.5rem 1rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:.85rem;cursor:pointer}
-        .year-select:focus{outline:none;border-color:var(--accent)}
+        .controls-right{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap}
+        .player-search{padding:.5rem 1rem;border:1px solid var(--border);border-radius:8px;background:var(--bg-secondary);color:var(--text-primary);font-size:.85rem;width:200px}
+        .player-search:focus{outline:none;border-color:var(--accent)}
+        .player-search::placeholder{color:var(--text-secondary)}
+        .sort-select,.year-select{padding:.5rem 1rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:.85rem;cursor:pointer}
+        .sort-select:focus,.year-select:focus{outline:none;border-color:var(--accent)}
         .view-toggle{display:flex;background:var(--bg-secondary);border-radius:8px;padding:.25rem;gap:.25rem;border:1px solid var(--border)}
         .view-btn{padding:.5rem 1rem;background:transparent;border:none;color:var(--text-secondary);border-radius:6px;cursor:pointer;font-size:.85rem;transition:all .2s}
         .view-btn:hover{color:var(--text-primary)}
@@ -59,6 +64,7 @@
         .leagues-grid.compact .roster-section,.leagues-grid.compact .picks-section{display:none}
         .league-card{background:var(--bg-secondary);border-radius:12px;overflow:hidden;border:1px solid var(--border);transition:border-color .2s,box-shadow .2s}
         .league-card:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+        .league-card.highlight{border-color:var(--success);box-shadow:0 0 0 2px var(--success-muted)}
         .league-header{padding:1rem;display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;border-bottom:1px solid var(--border)}
         .league-avatar{width:44px;height:44px;border-radius:10px;background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;overflow:hidden}
         .league-avatar img{width:100%;height:100%;object-fit:cover}
@@ -70,6 +76,9 @@
         .badge-redraft{background:var(--redraft-muted);color:var(--redraft)}
         .badge-keeper{background:var(--keeper-muted);color:var(--keeper)}
         .badge-setting{background:var(--accent-muted);color:var(--accent)}
+        .league-actions{display:flex;gap:.5rem}
+        .export-btn{background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);padding:.25rem .5rem;border-radius:4px;cursor:pointer;font-size:.7rem;transition:all .2s}
+        .export-btn:hover{border-color:var(--accent);color:var(--accent)}
         .league-record{text-align:right;flex-shrink:0}
         .record-value{font-size:1.2rem;font-weight:600}
         .record-label{font-size:.7rem;color:var(--text-secondary)}
@@ -83,6 +92,7 @@
         .players-list{display:flex;flex-direction:column;gap:.25rem}
         .player-row{display:flex;align-items:center;gap:.5rem;padding:.5rem;background:var(--bg-card);border-radius:6px;font-size:.85rem;transition:background .2s}
         .player-row:hover{background:var(--bg-hover)}
+        .player-row.searched{background:var(--success-muted);border:1px solid var(--success)}
         .player-pos{font-size:.65rem;font-weight:600;padding:.2rem .4rem;border-radius:4px;min-width:28px;text-align:center}
         .pos-qb{background:var(--error-muted);color:var(--error)}
         .pos-rb{background:var(--success-muted);color:var(--success)}
@@ -111,32 +121,68 @@
         .footer{text-align:center;padding:2rem;color:var(--text-secondary);font-size:.85rem}
         .footer a{color:var(--accent);text-decoration:none}
         .footer a:hover{text-decoration:underline}
-        @media(max-width:600px){.container{padding:1rem}.search-form{flex-direction:column}.leagues-grid{grid-template-columns:1fr}.stats-bar{grid-template-columns:repeat(2,1fr)}.controls-row{flex-direction:column;align-items:stretch}.controls-right{justify-content:space-between}}
+        .exposure-panel{background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1.5rem}
+        .exposure-title{font-size:.85rem;font-weight:600;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+        .exposure-grid{display:flex;flex-wrap:wrap;gap:.5rem}
+        .exposure-item{background:var(--bg-card);padding:.5rem .75rem;border-radius:6px;font-size:.8rem;display:flex;align-items:center;gap:.5rem}
+        .exposure-pos{font-weight:600;color:var(--accent)}
+        .exposure-count{color:var(--text-secondary)}
+        .multi-league{margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border)}
+        .multi-league-title{font-size:.75rem;color:var(--text-secondary);margin-bottom:.5rem}
+        .multi-league-list{display:flex;flex-wrap:wrap;gap:.375rem}
+        .multi-badge{font-size:.7rem;padding:.25rem .5rem;background:var(--warning-muted);color:var(--warning);border-radius:4px}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;padding:1rem}
+        .modal-overlay.active{display:flex}
+        .modal{background:var(--bg-secondary);border-radius:12px;padding:1.5rem;max-width:600px;width:100%;max-height:80vh;overflow:auto;border:1px solid var(--border)}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+        .modal-title{font-size:1.1rem;font-weight:600}
+        .modal-close{background:none;border:none;color:var(--text-secondary);font-size:1.5rem;cursor:pointer;padding:.25rem}
+        .modal-close:hover{color:var(--text-primary)}
+        .modal-content{background:var(--bg-card);border-radius:8px;padding:1rem;font-family:monospace;font-size:.8rem;white-space:pre-wrap;max-height:50vh;overflow:auto}
+        .modal-actions{display:flex;gap:.75rem;margin-top:1rem}
+        .modal-btn{flex:1;padding:.75rem;border-radius:8px;font-size:.9rem;cursor:pointer;transition:all .2s}
+        .modal-btn.primary{background:var(--accent);color:white;border:none}
+        .modal-btn.primary:hover{background:var(--accent-hover)}
+        .modal-btn.secondary{background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border)}
+        .modal-btn.secondary:hover{border-color:var(--accent)}
+        .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--success);color:white;padding:.75rem 1.5rem;border-radius:8px;font-size:.9rem;z-index:1001;opacity:0;transition:opacity .3s}
+        .toast.show{opacity:1}
+        @media(max-width:600px){.container{padding:1rem}.search-form{flex-direction:column}.leagues-grid{grid-template-columns:1fr}.stats-bar{grid-template-columns:repeat(2,1fr)}.controls-row{flex-direction:column;align-items:stretch}.controls-right{justify-content:space-between}.player-search{width:100%}}
     </style>
 </head>
 <body>
     <div class="container"><div id="app"></div></div>
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Exportar Roster</div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-content" id="modalContent"></div>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" onclick="closeModal()">Fechar</button>
+                <button class="modal-btn primary" onclick="copyModalContent()">Copiar</button>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast">Copiado!</div>
     <script>
         const API='https://api.sleeper.app/v1',SK='dynasty_user',TK='dynasty_theme';
-        let players={},user=null,leagues=[],filter='all',view='cards',year='2026',theme='dark';
+        let players={},user=null,leagues=[],filter='all',view='cards',year='2026',theme='dark',sortBy='name',playerSearch='';
         const posOrder=['QB','RB','WR','TE','K','DEF','DL','LB','DB'];
         
-        // Mapeamento de posições IDP para grupos consolidados
-        function normalizePosition(pos) {
-            if (!pos) return '?';
-            // CB -> DB
-            if (pos === 'CB' || pos === 'S' || pos === 'FS' || pos === 'SS') return 'DB';
-            // DE, DT -> DL
-            if (pos === 'DE' || pos === 'DT' || pos === 'NT') return 'DL';
-            // OLB, ILB, MLB -> LB
-            if (pos === 'OLB' || pos === 'ILB' || pos === 'MLB') return 'LB';
+        function normalizePosition(pos){
+            if(!pos)return'?';
+            if(['CB','S','FS','SS'].includes(pos))return'DB';
+            if(['DE','DT','NT'].includes(pos))return'DL';
+            if(['OLB','ILB','MLB'].includes(pos))return'LB';
             return pos;
         }
         
         function initTheme(){const s=localStorage.getItem(TK);if(s)theme=s;else if(window.matchMedia?.('(prefers-color-scheme:light)').matches)theme='light';document.documentElement.setAttribute('data-theme',theme)}
-        function toggleTheme(){theme=theme==='dark'?'light':'dark';localStorage.setItem(TK,theme);document.documentElement.setAttribute('data-theme',theme);const b=document.getElementById('themeToggle');if(b){b.textContent=theme==='dark'?'☀️':'🌙';b.title=theme==='dark'?'Modo claro':'Modo escuro'}}
+        function toggleTheme(){theme=theme==='dark'?'light':'dark';localStorage.setItem(TK,theme);document.documentElement.setAttribute('data-theme',theme);const b=document.getElementById('themeToggle');if(b){b.textContent=theme==='dark'?'☀️':'🌙'}}
         async function init(){initTheme();const s=localStorage.getItem(SK);if(s){try{user=JSON.parse(s);await loadLeagues();return}catch(e){localStorage.removeItem(SK)}}renderSearch()}
-        function renderSearch(){document.getElementById('app').innerHTML=`<header><h1>🏈 Dynasty Dashboard</h1><button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="${theme==='dark'?'Modo claro':'Modo escuro'}">${theme==='dark'?'☀️':'🌙'}</button></header><div class="search-section"><div class="search-logo">🏈</div><div class="search-title">Dynasty Dashboard</div><div class="search-subtitle">Visualize todas suas ligas Sleeper em um só lugar</div><div class="search-form"><input type="text" class="search-input" id="usernameInput" placeholder="Username do Sleeper" autocomplete="off"><button type="button" class="search-btn" id="searchBtn" onclick="handleSearch()">Carregar</button></div><label class="remember-me"><input type="checkbox" id="rememberMe" checked>Lembrar de mim</label></div><div class="footer">Dados via <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a></div>`;document.getElementById('usernameInput').addEventListener('keypress',e=>{if(e.key==='Enter')handleSearch()});document.getElementById('usernameInput').focus()}
+        function renderSearch(){document.getElementById('app').innerHTML=`<header><h1>🏈 Dynasty Dashboard</h1><button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">${theme==='dark'?'☀️':'🌙'}</button></header><div class="search-section"><div class="search-logo">🏈</div><div class="search-title">Dynasty Dashboard</div><div class="search-subtitle">Visualize todas suas ligas Sleeper em um só lugar</div><div class="search-form"><input type="text" class="search-input" id="usernameInput" placeholder="Username do Sleeper" autocomplete="off"><button type="button" class="search-btn" id="searchBtn" onclick="handleSearch()">Carregar</button></div><label class="remember-me"><input type="checkbox" id="rememberMe" checked>Lembrar de mim</label></div><div class="footer">Dados via <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a></div>`;document.getElementById('usernameInput').addEventListener('keypress',e=>{if(e.key==='Enter')handleSearch()});document.getElementById('usernameInput').focus()}
         async function handleSearch(){const u=document.getElementById('usernameInput').value.trim();if(!u)return;const b=document.getElementById('searchBtn');b.disabled=true;b.textContent='Carregando...';try{showLoad('Buscando usuário...');const r=await fetch(`${API}/user/${u}`);if(!r.ok)throw new Error('Usuário não encontrado');user=await r.json();if(document.getElementById('rememberMe')?.checked)localStorage.setItem(SK,JSON.stringify(user));await loadLeagues()}catch(e){renderSearch();showErr(e.message)}}
         async function loadLeagues(){showLoad('Carregando jogadores...');if(!Object.keys(players).length){try{const r=await fetch(`${API}/players/nfl`);players=await r.json()}catch(e){}}showLoad('Carregando ligas...');leagues=[];for(const s of['2026','2025','2024','2023']){try{const r=await fetch(`${API}/user/${user.user_id}/leagues/nfl/${s}`);const l=await r.json();if(l?.length){year=s;leagues=l;break}}catch(e){}}if(!leagues.length){renderSearch();showErr('Nenhuma liga encontrada');return}showLoad(`Carregando rosters (${leagues.length})...`);for(let i=0;i<leagues.length;i+=5){await Promise.all(leagues.slice(i,i+5).map(loadDetails))}renderDash()}
         async function loadDetails(l){try{const[ros,usr]=await Promise.all([fetch(`${API}/league/${l.league_id}/rosters`),fetch(`${API}/league/${l.league_id}/users`)]);l.rosters=await ros.json();l.users=await usr.json();l.myRoster=l.rosters.find(r=>r.owner_id===user.user_id);if(getType(l)==='dynasty'){try{const t=await fetch(`${API}/league/${l.league_id}/traded_picks`);l.tradedPicks=await t.json()}catch(e){l.tradedPicks=[]}}}catch(e){}}
@@ -145,17 +191,41 @@
         function logout(){localStorage.removeItem(SK);user=null;leagues=[];renderSearch()}
         function getType(l){if(l.settings?.type===2)return'dynasty';if(l.settings?.type===1)return'keeper';return'redraft'}
         function getSettings(l){const s=[],sc=l.scoring_settings||{};if(sc.rec===1)s.push('PPR');else if(sc.rec===0.5)s.push('Half');else s.push('Std');if(sc.bonus_rec_te>0)s.push('TEP');const p=l.roster_positions||[];if(p.includes('SUPER_FLEX'))s.push('SF');if(p.some(x=>['DL','LB','DB','IDP_FLEX','DE','DT','CB','S'].includes(x)))s.push('IDP');s.push(`${l.total_rosters}T`);return s}
-        function getFiltered(){return filter==='all'?leagues:leagues.filter(l=>getType(l)===filter)}
+        function getFiltered(){let f=filter==='all'?leagues:leagues.filter(l=>getType(l)===filter);if(playerSearch){const q=playerSearch.toLowerCase();f=f.filter(l=>{const rp=l.myRoster?.players||[];return rp.some(id=>{const p=players[id];return p&&(p.full_name||'').toLowerCase().includes(q)})})}return sortLeagues(f)}
+        function sortLeagues(ls){return[...ls].sort((a,b)=>{if(sortBy==='record'){const aw=(a.myRoster?.settings?.wins||0),bw=(b.myRoster?.settings?.wins||0);return bw-aw}if(sortBy==='points'){const ap=(a.myRoster?.settings?.fpts||0),bp=(b.myRoster?.settings?.fpts||0);return bp-ap}if(sortBy==='players'){const ap=(a.myRoster?.players?.length||0),bp=(b.myRoster?.players?.length||0);return bp-ap}return a.name.localeCompare(b.name)})}
         function getStats(){const f=getFiltered();let w=0,lo=0,t=0;f.forEach(l=>{if(l.myRoster?.settings){w+=l.myRoster.settings.wins||0;lo+=l.myRoster.settings.losses||0;t+=l.myRoster.settings.ties||0}});return{total:f.length,dynasty:leagues.filter(l=>getType(l)==='dynasty').length,redraft:leagues.filter(l=>getType(l)==='redraft').length,keeper:leagues.filter(l=>getType(l)==='keeper').length,wins:w,losses:lo,ties:t,pct:w+lo>0?((w/(w+lo))*100).toFixed(1):0}}
+        function getExposure(){const exp={},multi={};leagues.forEach(l=>{const rp=l.myRoster?.players||[];rp.forEach(id=>{const p=players[id];if(p){const pos=normalizePosition(p.position);exp[pos]=(exp[pos]||0)+1;const name=p.full_name||`${p.first_name} ${p.last_name}`;if(!multi[name])multi[name]=[];multi[name].push(l.name)}})});const multiFiltered={};Object.entries(multi).forEach(([name,ls])=>{if(ls.length>1)multiFiltered[name]=ls});return{byPosition:exp,multiLeague:multiFiltered}}
         function setFilter(f){filter=f;renderDash()}
+        function setSort(s){sortBy=s;renderDash()}
         function setView(v){view=v;renderDash()}
+        function setPlayerSearch(q){playerSearch=q;renderDash()}
         async function changeYear(y){year=y;showLoad(`Carregando ${y}...`);try{const r=await fetch(`${API}/user/${user.user_id}/leagues/nfl/${y}`);leagues=await r.json()||[];if(leagues.length){showLoad('Carregando rosters...');for(let i=0;i<leagues.length;i+=5){await Promise.all(leagues.slice(i,i+5).map(loadDetails))}}renderDash()}catch(e){renderDash()}}
-        function renderDash(){const st=getStats(),ls=getFiltered();document.getElementById('app').innerHTML=`<header><h1>🏈 Dynasty Dashboard</h1><div class="header-right"><button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">${theme==='dark'?'☀️':'🌙'}</button><div class="user-info">${user.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${user.avatar}" class="user-avatar">`:`<div class="user-avatar"></div>`}<span class="user-name">${user.display_name||user.username}</span></div><button class="logout-btn" onclick="logout()">Sair</button></div></header><div class="stats-bar"><div class="stat-card"><div class="stat-value">${st.total}</div><div class="stat-label">Ligas</div></div><div class="stat-card"><div class="stat-value">${st.dynasty}</div><div class="stat-label">Dynasty</div></div><div class="stat-card"><div class="stat-value">${st.wins}-${st.losses}${st.ties>0?`-${st.ties}`:''}</div><div class="stat-label">Record</div></div><div class="stat-card"><div class="stat-value">${st.pct}%</div><div class="stat-label">Win Rate</div></div></div><div class="controls-row"><div class="filters"><button class="filter-btn ${filter==='all'?'active':''}" onclick="setFilter('all')">Todas<span class="count">${leagues.length}</span></button><button class="filter-btn ${filter==='dynasty'?'active':''}" onclick="setFilter('dynasty')">Dynasty<span class="count">${st.dynasty}</span></button>${st.redraft>0?`<button class="filter-btn ${filter==='redraft'?'active':''}" onclick="setFilter('redraft')">Redraft<span class="count">${st.redraft}</span></button>`:''}${st.keeper>0?`<button class="filter-btn ${filter==='keeper'?'active':''}" onclick="setFilter('keeper')">Keeper<span class="count">${st.keeper}</span></button>`:''}</div><div class="controls-right"><select class="year-select" onchange="changeYear(this.value)"><option value="2026"${year==='2026'?' selected':''}>2026</option><option value="2025"${year==='2025'?' selected':''}>2025</option><option value="2024"${year==='2024'?' selected':''}>2024</option><option value="2023"${year==='2023'?' selected':''}>2023</option></select><div class="view-toggle"><button class="view-btn ${view==='cards'?'active':''}" onclick="setView('cards')">Cards</button><button class="view-btn ${view==='compact'?'active':''}" onclick="setView('compact')">Lista</button></div></div></div><div class="leagues-grid ${view}">${ls.map(renderCard).join('')}</div><div class="footer">Dados via <a href="https://docs.sleeper.com/">Sleeper API</a> • ${year}</div>`}
+        function renderDash(){const st=getStats(),ls=getFiltered(),exp=getExposure();document.getElementById('app').innerHTML=`<header><h1>🏈 Dynasty Dashboard</h1><div class="header-right"><button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">${theme==='dark'?'☀️':'🌙'}</button><div class="user-info">${user.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${user.avatar}" class="user-avatar">`:`<div class="user-avatar"></div>`}<span class="user-name">${user.display_name||user.username}</span></div><button class="logout-btn" onclick="logout()">Sair</button></div></header>
+        <div class="stats-bar"><div class="stat-card" onclick="setFilter('all')"><div class="stat-value">${st.total}</div><div class="stat-label">Ligas</div></div><div class="stat-card"><div class="stat-value">${st.dynasty}</div><div class="stat-label">Dynasty</div></div><div class="stat-card"><div class="stat-value">${st.wins}-${st.losses}${st.ties>0?`-${st.ties}`:''}</div><div class="stat-label">Record</div></div><div class="stat-card"><div class="stat-value">${st.pct}%</div><div class="stat-label">Win Rate</div></div></div>
+        <div class="exposure-panel"><div class="exposure-title">📊 Exposição por Posição</div><div class="exposure-grid">${posOrder.filter(p=>exp.byPosition[p]).map(p=>`<div class="exposure-item"><span class="exposure-pos">${p}</span><span class="exposure-count">${exp.byPosition[p]} jogadores</span></div>`).join('')}</div>${Object.keys(exp.multiLeague).length?`<div class="multi-league"><div class="multi-league-title">Jogadores em múltiplas ligas:</div><div class="multi-league-list">${Object.entries(exp.multiLeague).slice(0,15).map(([name,ls])=>`<span class="multi-badge" title="${ls.join(', ')}">${name} (${ls.length})</span>`).join('')}${Object.keys(exp.multiLeague).length>15?`<span class="multi-badge">+${Object.keys(exp.multiLeague).length-15} mais</span>`:''}</div></div>`:''}</div>
+        <div class="controls-row"><div class="filters"><button class="filter-btn ${filter==='all'?'active':''}" onclick="setFilter('all')">Todas<span class="count">${leagues.length}</span></button><button class="filter-btn ${filter==='dynasty'?'active':''}" onclick="setFilter('dynasty')">Dynasty<span class="count">${st.dynasty}</span></button>${st.redraft>0?`<button class="filter-btn ${filter==='redraft'?'active':''}" onclick="setFilter('redraft')">Redraft<span class="count">${st.redraft}</span></button>`:''}${st.keeper>0?`<button class="filter-btn ${filter==='keeper'?'active':''}" onclick="setFilter('keeper')">Keeper<span class="count">${st.keeper}</span></button>`:''}</div><div class="controls-right"><input type="text" class="player-search" placeholder="🔍 Buscar jogador..." value="${playerSearch}" oninput="setPlayerSearch(this.value)"><select class="sort-select" onchange="setSort(this.value)"><option value="name"${sortBy==='name'?' selected':''}>A-Z</option><option value="record"${sortBy==='record'?' selected':''}>Record</option><option value="points"${sortBy==='points'?' selected':''}>Pontos</option><option value="players"${sortBy==='players'?' selected':''}>Jogadores</option></select><select class="year-select" onchange="changeYear(this.value)"><option value="2026"${year==='2026'?' selected':''}>2026</option><option value="2025"${year==='2025'?' selected':''}>2025</option><option value="2024"${year==='2024'?' selected':''}>2024</option><option value="2023"${year==='2023'?' selected':''}>2023</option></select><div class="view-toggle"><button class="view-btn ${view==='cards'?'active':''}" onclick="setView('cards')">Cards</button><button class="view-btn ${view==='compact'?'active':''}" onclick="setView('compact')">Lista</button></div></div></div>
+        <div class="leagues-grid ${view}">${ls.map(l=>renderCard(l)).join('')}</div>
+        <div class="footer">Dados via <a href="https://docs.sleeper.com/">Sleeper API</a> • ${year} • v1.1.0</div>`}
         function renderCard(l){const ty=getType(l),se=getSettings(l),ro=l.myRoster,rec=ro?.settings?`${ro.settings.wins||0}-${ro.settings.losses||0}${ro.settings.ties?`-${ro.settings.ties}`:''}`:'-',pts=ro?.settings?.fpts?(ro.settings.fpts+(ro.settings.fpts_decimal||0)/100).toFixed(1):null,byPos={},rp=ro?.players||[],taxi=ro?.taxi||[],ir=ro?.reserve||[];
         rp.forEach(id=>{const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:ir.includes(id)?'IR':taxi.includes(id)?'TAXI':null})}});
         taxi.forEach(id=>{if(!rp.includes(id)){const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:'TAXI'})}}});
-        const sorted=Object.keys(byPos).sort((a,b)=>posOrder.indexOf(a)-posOrder.indexOf(b));let picks='';if(ty==='dynasty'){const mp=getPicks(l);if(mp.length)picks=`<div class="picks-section"><div class="picks-title">Draft Picks</div><div class="picks-grid">${mp.map(p=>`<span class="pick-badge ${p.own?'own':'extra'}" title="${p.note||''}">${p.label}</span>`).join('')}</div></div>`}return`<div class="league-card"><div class="league-header"><div class="league-avatar">${l.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${l.avatar}">`:'🏈'}</div><div class="league-info"><div class="league-name" title="${l.name}">${l.name}</div><div class="league-meta"><span class="league-badge badge-${ty}">${ty}</span>${se.map(s=>`<span class="league-badge badge-setting">${s}</span>`).join('')}</div></div><div class="league-record"><div class="record-value">${rec}</div>${pts?`<div class="record-label">${pts} pts</div>`:''}</div></div><div class="roster-section">${sorted.map(pos=>`<div class="position-group"><div class="position-header">${pos}<span class="position-count">${byPos[pos].length}</span></div><div class="players-list">${byPos[pos].sort((a,b)=>(a.search_rank||9999)-(b.search_rank||9999)).map(p=>`<div class="player-row"><span class="player-pos pos-${pos.toLowerCase()}">${p.displayPos||pos}</span><span class="player-name">${p.full_name||p.first_name+' '+p.last_name}</span><span class="player-team">${p.team||'FA'}</span>${p.status?`<span class="player-status status-${p.status.toLowerCase()}">${p.status}</span>`:''}</div>`).join('')}</div></div>`).join('')}</div>${picks}</div>`}
+        const sorted=Object.keys(byPos).sort((a,b)=>posOrder.indexOf(a)-posOrder.indexOf(b));
+        const hasSearched=playerSearch&&rp.some(id=>{const p=players[id];return p&&(p.full_name||'').toLowerCase().includes(playerSearch.toLowerCase())});
+        let picks='';if(ty==='dynasty'){const mp=getPicks(l);if(mp.length)picks=`<div class="picks-section"><div class="picks-title">Draft Picks</div><div class="picks-grid">${mp.map(p=>`<span class="pick-badge ${p.own?'own':'extra'}" title="${p.note||''}">${p.label}</span>`).join('')}</div></div>`}
+        return`<div class="league-card${hasSearched?' highlight':''}"><div class="league-header"><div class="league-avatar">${l.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${l.avatar}">`:'🏈'}</div><div class="league-info"><div class="league-name" title="${l.name}">${l.name}</div><div class="league-meta"><span class="league-badge badge-${ty}">${ty}</span>${se.map(s=>`<span class="league-badge badge-setting">${s}</span>`).join('')}</div></div><div class="league-actions"><button class="export-btn" onclick="exportRoster('${l.league_id}')" title="Exportar MD">📄</button></div><div class="league-record"><div class="record-value">${rec}</div>${pts?`<div class="record-label">${pts} pts</div>`:''}</div></div><div class="roster-section">${sorted.map(pos=>`<div class="position-group"><div class="position-header">${pos}<span class="position-count">${byPos[pos].length}</span></div><div class="players-list">${byPos[pos].sort((a,b)=>(a.search_rank||9999)-(b.search_rank||9999)).map(p=>{const isSearched=playerSearch&&(p.full_name||'').toLowerCase().includes(playerSearch.toLowerCase());return`<div class="player-row${isSearched?' searched':''}"><span class="player-pos pos-${pos.toLowerCase()}">${p.displayPos||pos}</span><span class="player-name">${p.full_name||p.first_name+' '+p.last_name}</span><span class="player-team">${p.team||'FA'}</span>${p.status?`<span class="player-status status-${p.status.toLowerCase()}">${p.status}</span>`:''}</div>`}).join('')}</div></div>`).join('')}</div>${picks}</div>`}
         function getPicks(l){const picks=[],tp=l.tradedPicks||[],rid=l.myRoster?.roster_id;if(!rid)return picks;const cs=parseInt(l.season);for(let y=cs+1;y<=cs+3;y++){for(let r=1;r<=5;r++){const traded=tp.find(t=>t.season===String(y)&&t.round===r&&t.roster_id===rid&&t.owner_id!==rid);if(!traded)picks.push({label:`'${String(y).slice(-2)} R${r}`,own:true,note:'Sua'});const acq=tp.filter(t=>t.season===String(y)&&t.round===r&&t.owner_id===rid&&t.roster_id!==rid);acq.forEach(t=>{const oo=l.rosters?.find(x=>x.roster_id===t.roster_id),ou=l.users?.find(u=>u.user_id===oo?.owner_id);picks.push({label:`'${String(y).slice(-2)} R${r}`,own:false,note:ou?.display_name||'Adq'})})}}return picks.sort((a,b)=>{const[ay,ar]=a.label.match(/\d+/g),[by,br]=b.label.match(/\d+/g);return ay-by||ar-br})}
+        function exportRoster(leagueId){const l=leagues.find(x=>x.league_id===leagueId);if(!l)return;const md=generateMarkdown(l);document.getElementById('modalTitle').textContent=`Exportar: ${l.name}`;document.getElementById('modalContent').textContent=md;document.getElementById('modalOverlay').classList.add('active')}
+        function generateMarkdown(l){const ty=getType(l),se=getSettings(l),ro=l.myRoster,rec=ro?.settings?`${ro.settings.wins||0}-${ro.settings.losses||0}${ro.settings.ties?`-${ro.settings.ties}`:''}`:'-';
+        const byPos={},rp=ro?.players||[],taxi=ro?.taxi||[],ir=ro?.reserve||[];
+        rp.forEach(id=>{const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:ir.includes(id)?'IR':taxi.includes(id)?'TAXI':null})}});
+        taxi.forEach(id=>{if(!rp.includes(id)){const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:'TAXI'})}}});
+        let md=`# ${l.name} - Roster Summary\n**League Type:** ${ty.charAt(0).toUpperCase()+ty.slice(1)} | ${se.join(' | ')}\n**As of ${year} Season**\n\n---\n\n## Current Record & Status\n- **Record:** ${rec}\n- **Strategy:** [Competing/Retooling/Rebuilding]\n\n---\n\n## ACTIVE ROSTER\n\n`;
+        posOrder.forEach(pos=>{if(byPos[pos]){md+=`### ${pos} (${byPos[pos].length})\n| Player | NFL Team | Status |\n|--------|----------|--------|\n`;byPos[pos].sort((a,b)=>(a.search_rank||9999)-(b.search_rank||9999)).forEach(p=>{const name=p.full_name||`${p.first_name} ${p.last_name}`;const status=p.status||'ACTIVE';md+=`| ${status==='TAXI'||status==='IR'?'*':''}${name}${status==='TAXI'||status==='IR'?'*':''} | ${p.team||'FA'} | ${status} |\n`});md+='\n'}});
+        if(ty==='dynasty'){const picks=getPicks(l);if(picks.length){md+=`---\n\n## DRAFT PICKS\n\n`;const byYear={};picks.forEach(p=>{const y='20'+p.label.match(/\d+/)[0];if(!byYear[y])byYear[y]=[];byYear[y].push(p)});Object.keys(byYear).sort().forEach(y=>{md+=`### ${y} Draft Picks\n| Round | Status |\n|-------|--------|\n`;byYear[y].forEach(p=>{md+=`| ${p.label.split(' ')[1]} | ${p.own?'Own Pick':p.note} |\n`});md+='\n'})}}
+        md+=`---\n\n*Generated by Dynasty Dashboard*`;return md}
+        function closeModal(e){if(e&&e.target!==e.currentTarget)return;document.getElementById('modalOverlay').classList.remove('active')}
+        function copyModalContent(){const content=document.getElementById('modalContent').textContent;navigator.clipboard.writeText(content);showToast('Copiado para clipboard!')}
+        function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
         init();
     </script>
 </body>
