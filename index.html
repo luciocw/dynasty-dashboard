@@ -220,6 +220,7 @@
         .pos-db{background:var(--keeper-muted);color:var(--keeper)}
         .player-name{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .player-team{font-size:.65rem;color:var(--text-secondary);background:var(--bg-primary);padding:.15rem .3rem;border-radius:4px}
+        .player-age{font-size:.6rem;color:var(--text-secondary);opacity:.7}
         .player-status{font-size:.6rem;padding:.1rem .25rem;border-radius:4px;font-weight:500}
         .status-ir{background:var(--error-muted);color:var(--error)}
         .status-taxi{background:var(--dynasty-muted);color:var(--dynasty)}
@@ -345,12 +346,15 @@ const i18n = {
         compareRosters: 'Comparar Rosters',
         draftCapital: 'Draft Capital',
         posExposure: 'Exposição por Posição',
+        standings: 'Standings',
         sortAZ: 'A-Z',
         sortRecord: 'Record',
         sortPoints: 'Pontos',
+        sortWinPct: 'Win%',
         cards: 'Cards',
         list: 'Lista',
         dataVia: 'Dados via',
+        age: 'anos',
         lang: '🇧🇷'
     },
     'en': {
@@ -419,12 +423,15 @@ const i18n = {
         compareRosters: 'Compare Rosters',
         draftCapital: 'Draft Capital',
         posExposure: 'Position Exposure',
+        standings: 'Standings',
         sortAZ: 'A-Z',
         sortRecord: 'Record',
         sortPoints: 'Points',
+        sortWinPct: 'Win%',
         cards: 'Cards',
         list: 'List',
         dataVia: 'Data via',
+        age: 'y/o',
         lang: '🇺🇸'
     },
     'es': {
@@ -493,12 +500,15 @@ const i18n = {
         compareRosters: 'Comparar Rosters',
         draftCapital: 'Draft Capital',
         posExposure: 'Exposición por Posición',
+        standings: 'Clasificación',
         sortAZ: 'A-Z',
         sortRecord: 'Record',
         sortPoints: 'Puntos',
+        sortWinPct: 'Win%',
         cards: 'Cards',
         list: 'Lista',
         dataVia: 'Datos via',
+        age: 'años',
         lang: '🇪🇸'
     }
 };
@@ -652,7 +662,19 @@ function logout(){localStorage.removeItem(USER_KEY);clearCache();user=null;leagu
 function getType(l){if(l.settings?.type===2)return'dynasty';if(l.settings?.type===1)return'keeper';return'redraft'}
 function getSettings(l){const s=[],sc=l.scoring_settings||{};if(sc.rec===1)s.push('PPR');else if(sc.rec===0.5)s.push('Half');else s.push('Std');if(sc.bonus_rec_te>0)s.push('TEP');const p=l.roster_positions||[];if(p.includes('SUPER_FLEX'))s.push('SF');if(p.some(x=>['DL','LB','DB','IDP_FLEX','DE','DT','CB','S'].includes(x)))s.push('IDP');s.push(`${l.total_rosters}T`);return s}
 function getFiltered(){let f=filter==='all'?leagues:leagues.filter(l=>getType(l)===filter);if(playerSearch){const q=playerSearch.toLowerCase();f=f.filter(l=>{const rp=l.myRoster?.players||[];return rp.some(id=>{const p=players[id];return p&&(p.full_name||'').toLowerCase().includes(q)})})}return sortLeagues(f)}
-function sortLeagues(ls){return[...ls].sort((a,b)=>{if(sortBy==='record')return(b.myRoster?.settings?.wins||0)-(a.myRoster?.settings?.wins||0);if(sortBy==='points')return(b.myRoster?.settings?.fpts||0)-(a.myRoster?.settings?.fpts||0);if(sortBy==='players')return(b.myRoster?.players?.length||0)-(a.myRoster?.players?.length||0);return a.name.localeCompare(b.name)})}
+function sortLeagues(ls){return[...ls].sort((a,b)=>{
+    if(sortBy==='record')return(b.myRoster?.settings?.wins||0)-(a.myRoster?.settings?.wins||0);
+    if(sortBy==='points')return(b.myRoster?.settings?.fpts||0)-(a.myRoster?.settings?.fpts||0);
+    if(sortBy==='winpct'){
+        const aW=a.myRoster?.settings?.wins||0,aL=a.myRoster?.settings?.losses||0;
+        const bW=b.myRoster?.settings?.wins||0,bL=b.myRoster?.settings?.losses||0;
+        const aPct=(aW+aL)>0?(aW/(aW+aL)):0;
+        const bPct=(bW+bL)>0?(bW/(bW+bL)):0;
+        return bPct-aPct;
+    }
+    if(sortBy==='players')return(b.myRoster?.players?.length||0)-(a.myRoster?.players?.length||0);
+    return a.name.localeCompare(b.name)
+})}
 function getStats(){const f=getFiltered();let w=0,lo=0,t=0;f.forEach(l=>{if(l.myRoster?.settings){w+=l.myRoster.settings.wins||0;lo+=l.myRoster.settings.losses||0;t+=l.myRoster.settings.ties||0}});return{total:f.length,dynasty:leagues.filter(l=>getType(l)==='dynasty').length,redraft:leagues.filter(l=>getType(l)==='redraft').length,keeper:leagues.filter(l=>getType(l)==='keeper').length,wins:w,losses:lo,ties:t,pct:w+lo>0?((w/(w+lo))*100).toFixed(1):0}}
 
 // Injury alerts
@@ -802,6 +824,31 @@ function renderRankingsPanel(){
     <div class="rankings-selector"><select class="mini-select" onchange="setSelectedLeague(this.value)"><option value="">${t('select')}</option>${opts}</select></div>${content}</div>`;
 }
 
+function renderStandingsPanel(){
+    const standingsData=leagues.map(l=>{
+        const ranks=getPowerRankings(l.league_id);
+        const myPos=ranks.findIndex(r=>r.isMe)+1;
+        const total=ranks.length;
+        const me=ranks.find(r=>r.isMe);
+        return{
+            name:l.name,
+            leagueId:l.league_id,
+            position:myPos,
+            total,
+            wins:me?.wins||0,
+            losses:me?.losses||0,
+            winPct:me?.winPct||0,
+            pf:me?.pf||0
+        };
+    }).sort((a,b)=>a.position/a.total-b.position/b.total);
+    
+    const posLabel=lang==='en'?'of':'de';
+    return`<div class="panel show"><div class="panel-header"><div class="panel-title">📊 ${t('standings')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
+    <div class="rankings-list">${standingsData.map(s=>{
+        const posClass=s.position<=3?'top3':s.position>s.total-3?'bottom3':'mid';
+        return`<div class="ranking-item"><span class="ranking-pos ${posClass}">${s.position}°</span><span class="ranking-team">${s.name}</span><div class="ranking-stats"><div class="ranking-stat"><div class="ranking-stat-value">${s.wins}-${s.losses}</div><div>${t('record')}</div></div><div class="ranking-stat"><div class="ranking-stat-value">${s.winPct.toFixed(1)}%</div><div>Win%</div></div><div class="ranking-stat"><div class="ranking-stat-value">${s.position}/${s.total}</div><div>Pos</div></div></div></div>`}).join('')}</div></div>`;
+}
+
 function renderByePanel(){
     const opts=leagues.map(l=>`<option value="${l.league_id}" ${selectedLeague===l.league_id?'selected':''}>${l.name}</option>`).join('');
     let content='';
@@ -862,6 +909,7 @@ function renderDash(){
     else if(showPanel==='matchups')panelHtml=renderMatchupsPanel();
     else if(showPanel==='trades')panelHtml=renderTradesPanel();
     else if(showPanel==='rankings')panelHtml=renderRankingsPanel();
+    else if(showPanel==='standings')panelHtml=renderStandingsPanel();
     else if(showPanel==='bye')panelHtml=renderByePanel();
     else if(showPanel==='compare')panelHtml=renderComparePanel();
     else if(showPanel==='capital')panelHtml=renderCapitalPanel();
@@ -883,9 +931,10 @@ function renderDash(){
         <div class="tool-chip ${showPanel==='matchups'?'active':''}" onclick="togglePanel('matchups')"><span class="chip-icon">🏈</span>${t('matchups')}</div>
         ${hasDyn?`<div class="tool-chip ${showPanel==='trades'?'active':''}" onclick="togglePanel('trades')"><span class="chip-icon">🔄</span>${t('trades')}</div>`:''}
         <div class="tool-chip ${showPanel==='rankings'?'active':''}" onclick="togglePanel('rankings')"><span class="chip-icon">🏆</span>${t('rankings')}</div>
+        <div class="tool-chip ${showPanel==='standings'?'active':''}" onclick="togglePanel('standings')"><span class="chip-icon">📊</span>${t('standings')}</div>
         <div class="tool-chip ${showPanel==='bye'?'active':''}" onclick="togglePanel('bye')"><span class="chip-icon">📅</span>${t('byeWeeks')}</div>
         <div class="tool-chip ${showPanel==='compare'?'active':''}" onclick="togglePanel('compare')"><span class="chip-icon">⚖️</span>${t('compare')}</div>
-        ${hasDyn?`<div class="tool-chip ${showPanel==='capital'?'active':''}" onclick="togglePanel('capital')"><span class="chip-icon">📊</span>${t('capital')}</div>`:''}
+        ${hasDyn?`<div class="tool-chip ${showPanel==='capital'?'active':''}" onclick="togglePanel('capital')"><span class="chip-icon">📋</span>${t('capital')}</div>`:''}
         <div class="tool-chip ${showPanel==='exposure'?'active':''}" onclick="togglePanel('exposure')"><span class="chip-icon">📈</span>${t('exposure')}</div>
     </div>
     
@@ -915,6 +964,7 @@ function renderDash(){
             <select class="mini-select" onchange="sortBy=this.value;renderDash()">
                 <option value="name" ${sortBy==='name'?'selected':''}>${t('sortAZ')}</option>
                 <option value="record" ${sortBy==='record'?'selected':''}>${t('sortRecord')}</option>
+                <option value="winpct" ${sortBy==='winpct'?'selected':''}>${t('sortWinPct')}</option>
                 <option value="points" ${sortBy==='points'?'selected':''}>${t('sortPoints')}</option>
             </select>
             <select class="mini-select" onchange="year=this.value;loadLeagues(true)">
@@ -938,6 +988,8 @@ function renderDash(){
 }
 
 function getLineup(l){const rp=l.roster_positions||[];const c={};const ord=['QB','RB','WR','TE','FLEX','SUPER_FLEX','REC_FLEX','K','DL','LB','DB','IDP_FLEX'];rp.forEach(p=>{if(p!=='BN')c[p]=(c[p]||0)+1});const s=[];ord.forEach(p=>{if(c[p]){const lb=p==='SUPER_FLEX'?'SF':p==='REC_FLEX'?'RF':p==='IDP_FLEX'?'IDP':p;s.push({pos:p,count:c[p],label:c[p]>1?`${c[p]}${lb}`:lb})}});return s}
+
+function getAge(p){if(!p?.birth_date)return null;const birth=new Date(p.birth_date);const today=new Date();let age=today.getFullYear()-birth.getFullYear();const m=today.getMonth()-birth.getMonth();if(m<0||(m===0&&today.getDate()<birth.getDate()))age--;return age}
 
 function renderCard(l){
     const ty=getType(l),se=getSettings(l),ro=l.myRoster;
@@ -965,7 +1017,8 @@ function renderCard(l){
         <div class="roster-section">${sorted.map(pos=>`<div class="position-group"><div class="position-header">${pos}<span class="position-count">${byPos[pos].length}</span></div><div class="players-list">${byPos[pos].sort((a,b)=>(a.search_rank||9999)-(b.search_rank||9999)).map(p=>{
             const isSearched=playerSearch&&(p.full_name||'').toLowerCase().includes(playerSearch.toLowerCase());
             const isInj=p.injury_status&&['Out','Doubtful','Questionable','IR'].includes(p.injury_status);
-            return`<div class="player-row${isSearched?' searched':''}${isInj?' injured':''}"><span class="player-pos pos-${pos.toLowerCase()}">${p.displayPos||pos}</span><span class="player-name">${p.full_name||p.first_name+' '+p.last_name}</span><span class="player-team">${p.team||'FA'}</span>${isInj?`<span class="player-status status-inj">${p.injury_status}</span>`:''}${p.status?`<span class="player-status status-${p.status.toLowerCase()}">${p.status}</span>`:''}</div>`}).join('')}</div></div>`).join('')}</div>
+            const age=getAge(p);
+            return`<div class="player-row${isSearched?' searched':''}${isInj?' injured':''}"><span class="player-pos pos-${pos.toLowerCase()}">${p.displayPos||pos}</span><span class="player-name">${p.full_name||p.first_name+' '+p.last_name}</span><span class="player-team">${p.team||'FA'}</span>${age?`<span class="player-age">${age}</span>`:''}${isInj?`<span class="player-status status-inj">${p.injury_status}</span>`:''}${p.status?`<span class="player-status status-${p.status.toLowerCase()}">${p.status}</span>`:''}</div>`}).join('')}</div></div>`).join('')}</div>
         ${picks}
     </div>`;
 }
