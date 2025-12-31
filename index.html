@@ -254,6 +254,7 @@
         .footer{text-align:center;padding:1.5rem;color:var(--text-secondary);font-size:.8rem}
         .footer a{color:var(--accent);text-decoration:none}
         .coffee-btn{display:inline-flex;align-items:center;gap:.4rem;background:linear-gradient(135deg,#FF813F,#FFDD00);color:#000;padding:.5rem 1rem;border-radius:8px;font-weight:600;font-size:.8rem;text-decoration:none!important;margin-top:.5rem;transition:transform .2s}
+        .twitter-link{color:var(--accent);text-decoration:none;font-weight:500}.twitter-link:hover{text-decoration:underline}
         .coffee-btn:hover{transform:translateY(-2px)}
         
         .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;padding:1rem}
@@ -378,6 +379,8 @@ const i18n = {
         cards: 'Cards',
         list: 'Lista',
         dataVia: 'Dados via',
+        developedBy: 'Desenvolvido por',
+        codedBy: 'programado por',
         age: 'anos',
         lang: '🇧🇷'
     },
@@ -464,6 +467,8 @@ const i18n = {
         cards: 'Cards',
         list: 'List',
         dataVia: 'Data via',
+        developedBy: 'Developed by',
+        codedBy: 'coded by',
         age: 'y/o',
         lang: '🇺🇸'
     },
@@ -550,6 +555,8 @@ const i18n = {
         cards: 'Cards',
         list: 'Lista',
         dataVia: 'Datos via',
+        developedBy: 'Desarrollado por',
+        codedBy: 'programado por',
         age: 'años',
         lang: '🇪🇸'
     }
@@ -1195,8 +1202,9 @@ function renderDash(){
     <div class="leagues-grid ${view}">${ls.map(l=>renderCard(l)).join('')}</div>
     
     <div class="footer">
-        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • ${year} • v1.3.0<br>
-        <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener" class="coffee-btn" onclick="window.open(this.href);return false;">☕ Buy me a coffee</a>
+        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • ${year} • v1.4.0<br>
+        ${t('developedBy')} <strong>Lucio</strong>, ${t('codedBy')} <strong>Claude</strong> • <a href="https://x.com/luciocw" target="_blank" rel="noopener" class="twitter-link">𝕏 @luciocw</a><br>
+        <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener" class="coffee-btn">☕ Buy me a coffee</a>
     </div>`;
 }
 
