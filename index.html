@@ -952,41 +952,54 @@ function calculateFinalPosition(myRoster,rosters,winners,losers){
     const rosterId=myRoster.roster_id;
     const totalTeams=rosters.length;
     
-    // Check winners bracket for final positions
-    if(winners?.length){
-        // Find championship match (usually last match or match with no next match pointing to it)
-        const champMatch=winners.find(m=>m.p===1)||winners.find(m=>!winners.some(x=>x.w===m.m||x.l===m.m));
+    // Primeiro, verificar se está no winners_bracket (playoffs do título)
+    const inWinnersBracket=winners?.some(m=>m.t1===rosterId||m.t2===rosterId||m.w===rosterId||m.l===rosterId);
+    
+    if(inWinnersBracket && winners?.length){
+        // Procurar partida com placement definido onde participou
+        const myWinnersMatches=winners.filter(m=>m.w===rosterId||m.l===rosterId||m.t1===rosterId||m.t2===rosterId);
         
-        if(champMatch){
-            if(champMatch.w===rosterId)return{position:1,label:t('champion'),madePlayoffs:true};
-            if(champMatch.l===rosterId)return{position:2,label:t('runnerUp'),madePlayoffs:true};
-        }
+        // Verificar se foi campeão (p:1 e vencedor)
+        const champMatch=winners.find(m=>m.p===1);
+        if(champMatch?.w===rosterId)return{position:1,label:t('champion'),madePlayoffs:true};
+        if(champMatch?.l===rosterId)return{position:2,label:t('runnerUp'),madePlayoffs:true};
         
-        // 3rd place match
+        // Verificar 3º lugar
         const thirdMatch=winners.find(m=>m.p===3);
-        if(thirdMatch){
-            if(thirdMatch.w===rosterId)return{position:3,label:t('thirdPlace'),madePlayoffs:true};
-            if(thirdMatch.l===rosterId)return{position:4,label:`4${t('place')}`,madePlayoffs:true};
+        if(thirdMatch?.w===rosterId)return{position:3,label:t('thirdPlace'),madePlayoffs:true};
+        if(thirdMatch?.l===rosterId)return{position:4,label:`4${t('place')}`,madePlayoffs:true};
+        
+        // Verificar outras posições definidas
+        for(const m of myWinnersMatches){
+            if(m.p && (m.w===rosterId||m.l===rosterId)){
+                const pos=m.w===rosterId?m.p:m.p+1;
+                return{position:pos,label:`${pos}${t('place')}`,madePlayoffs:true};
+            }
         }
         
-        // Check if made playoffs at all
-        const inWinners=winners.some(m=>m.t1===rosterId||m.t2===rosterId||m.w===rosterId||m.l===rosterId);
-        if(inWinners){
-            // Find their last match and determine position
-            const myMatches=winners.filter(m=>m.t1===rosterId||m.t2===rosterId||m.w===rosterId||m.l===rosterId);
-            const lastMatch=myMatches[myMatches.length-1];
-            if(lastMatch?.p)return{position:lastMatch.p,label:`${lastMatch.p}${t('place')}`,madePlayoffs:true};
-            return{position:5,label:`5${t('place')}`,madePlayoffs:true};
+        // Está no winners bracket mas sem placement definido - estimar pela rodada que perdeu
+        const lostMatch=myWinnersMatches.find(m=>m.l===rosterId);
+        if(lostMatch){
+            const round=lostMatch.r||1;
+            const estimatedPos=Math.pow(2,round)+1; // rough estimate
+            return{position:Math.min(estimatedPos,totalTeams),label:`Top ${Math.pow(2,round+1)}`,madePlayoffs:true};
         }
+        
+        return{position:4,label:`Playoffs`,madePlayoffs:true};
     }
     
-    // Check losers/consolation bracket
-    if(losers?.length){
-        const inLosers=losers.some(m=>m.t1===rosterId||m.t2===rosterId||m.w===rosterId||m.l===rosterId);
-        if(inLosers){
-            const myMatches=losers.filter(m=>m.t1===rosterId||m.t2===rosterId||m.w===rosterId||m.l===rosterId);
-            const lastMatch=myMatches[myMatches.length-1];
-            if(lastMatch?.p)return{position:lastMatch.p,label:`${lastMatch.p}${t('place')}`,madePlayoffs:false};
+    // Não está no winners_bracket - verificar losers_bracket (consolation/toilet bowl)
+    const inLosersBracket=losers?.some(m=>m.t1===rosterId||m.t2===rosterId||m.w===rosterId||m.l===rosterId);
+    
+    if(inLosersBracket && losers?.length){
+        const myLosersMatches=losers.filter(m=>m.w===rosterId||m.l===rosterId||m.t1===rosterId||m.t2===rosterId);
+        
+        // Verificar posições definidas no losers bracket
+        for(const m of myLosersMatches){
+            if(m.p && (m.w===rosterId||m.l===rosterId)){
+                const pos=m.w===rosterId?m.p:m.p+1;
+                return{position:pos,label:`${pos}${t('place')}`,madePlayoffs:false};
+            }
         }
     }
     
