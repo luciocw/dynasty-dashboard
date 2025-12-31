@@ -941,8 +941,11 @@ function getLineup(l){const rp=l.roster_positions||[];const c={};const ord=['QB'
 
 function renderCard(l){
     const ty=getType(l),se=getSettings(l),ro=l.myRoster;
-    const rec=ro?.settings?`${ro.settings.wins||0}-${ro.settings.losses||0}`:'--';
-    const pts=ro?.settings?.fpts?(ro.settings.fpts+(ro.settings.fpts_decimal||0)/100).toFixed(1):null;
+    const wins=ro?.settings?.wins||0,losses=ro?.settings?.losses||0;
+    const rec=ro?.settings?`${wins}-${losses}`:'--';
+    const totalGames=wins+losses;
+    const winPct=totalGames>0?((wins/totalGames)*100).toFixed(1):null;
+    const pf=ro?.settings?.fpts?(ro.settings.fpts+(ro.settings.fpts_decimal||0)/100).toFixed(1):null;
     const byPos={},rp=ro?.players||[],taxi=ro?.taxi||[],ir=ro?.reserve||[];
     rp.forEach(id=>{const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:ir.includes(id)?'IR':taxi.includes(id)?'TAXI':null})}});
     taxi.forEach(id=>{if(!rp.includes(id)){const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:'TAXI'})}}});
@@ -956,7 +959,7 @@ function renderCard(l){
             <div class="league-avatar">${l.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${l.avatar}">`:'🏈'}</div>
             <div class="league-info"><div class="league-name" title="${l.name}">${l.name}</div><div class="league-meta"><span class="league-badge badge-${ty}">${ty}</span>${se.map(s=>`<span class="league-badge badge-setting">${s}</span>`).join('')}</div></div>
             <div class="league-actions"><button class="icon-btn" onclick="exportRoster('${l.league_id}')" title="${t('export')}" style="width:28px;height:28px;font-size:.8rem">📄</button></div>
-            <div class="league-record"><div class="record-value">${rec}</div>${pts?`<div class="record-label">${pts} ${t('pts')}</div>`:''}</div>
+            <div class="league-record"><div class="record-value">${rec}</div>${winPct?`<div class="record-label">${winPct}%</div>`:''}${pf?`<div class="record-label">${pf} PF</div>`:''}</div>
         </div>
         ${lineupHtml}
         <div class="roster-section">${sorted.map(pos=>`<div class="position-group"><div class="position-header">${pos}<span class="position-count">${byPos[pos].length}</span></div><div class="players-list">${byPos[pos].sort((a,b)=>(a.search_rank||9999)-(b.search_rank||9999)).map(p=>{
