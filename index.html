@@ -910,22 +910,20 @@ async function loadSeasonHistory(){
             
             for(const league of leaguesList){
                 try{
-                    const[rostersRes,usersRes,winnersRes,losersRes]=await Promise.all([
+                    const[rostersRes,usersRes,winnersRes]=await Promise.all([
                         fetch(`${API}/league/${league.league_id}/rosters`),
                         fetch(`${API}/league/${league.league_id}/users`),
-                        fetch(`${API}/league/${league.league_id}/winners_bracket`),
-                        fetch(`${API}/league/${league.league_id}/losers_bracket`)
+                        fetch(`${API}/league/${league.league_id}/winners_bracket`)
                     ]);
                     
                     const rosters=await rostersRes.json();
                     const users=await usersRes.json();
                     const winners=await winnersRes.json();
-                    const losers=await losersRes.json();
                     
                     const myRoster=rosters.find(r=>r.owner_id===user.user_id);
                     if(!myRoster)continue;
                     
-                    const finalPos=calculateFinalPosition(myRoster,rosters,winners,losers);
+                    const finalPos=calculateFinalPosition(myRoster,rosters,winners,null);
                     const wins=myRoster.settings?.wins||0;
                     const losses=myRoster.settings?.losses||0;
                     
@@ -952,13 +950,10 @@ function calculateFinalPosition(myRoster,rosters,winners,losers){
     const rosterId=myRoster.roster_id;
     const totalTeams=rosters.length;
     
-    // Primeiro, verificar se está no winners_bracket (playoffs do título)
+    // Verificar apenas winners_bracket (playoffs do título)
     const inWinnersBracket=winners?.some(m=>m.t1===rosterId||m.t2===rosterId||m.w===rosterId||m.l===rosterId);
     
     if(inWinnersBracket && winners?.length){
-        // Procurar partida com placement definido onde participou
-        const myWinnersMatches=winners.filter(m=>m.w===rosterId||m.l===rosterId||m.t1===rosterId||m.t2===rosterId);
-        
         // Verificar se foi campeão (p:1 e vencedor)
         const champMatch=winners.find(m=>m.p===1);
         if(champMatch?.w===rosterId)return{position:1,label:t('champion'),madePlayoffs:true};
@@ -969,48 +964,30 @@ function calculateFinalPosition(myRoster,rosters,winners,losers){
         if(thirdMatch?.w===rosterId)return{position:3,label:t('thirdPlace'),madePlayoffs:true};
         if(thirdMatch?.l===rosterId)return{position:4,label:`4${t('place')}`,madePlayoffs:true};
         
-        // Verificar outras posições definidas
-        for(const m of myWinnersMatches){
-            if(m.p && (m.w===rosterId||m.l===rosterId)){
+        // Verificar outras posições definidas no winners bracket
+        const myMatches=winners.filter(m=>m.w===rosterId||m.l===rosterId);
+        for(const m of myMatches){
+            if(m.p){
                 const pos=m.w===rosterId?m.p:m.p+1;
                 return{position:pos,label:`${pos}${t('place')}`,madePlayoffs:true};
             }
         }
         
-        // Está no winners bracket mas sem placement definido - estimar pela rodada que perdeu
-        const lostMatch=myWinnersMatches.find(m=>m.l===rosterId);
-        if(lostMatch){
-            const round=lostMatch.r||1;
-            const estimatedPos=Math.pow(2,round)+1; // rough estimate
-            return{position:Math.min(estimatedPos,totalTeams),label:`Top ${Math.pow(2,round+1)}`,madePlayoffs:true};
-        }
-        
-        return{position:4,label:`Playoffs`,madePlayoffs:true};
+        // Está no winners bracket mas sem placement específico
+        return{position:5,label:'Playoffs',madePlayoffs:true};
     }
     
-    // Não está no winners_bracket - verificar losers_bracket (consolation/toilet bowl)
-    const inLosersBracket=losers?.some(m=>m.t1===rosterId||m.t2===rosterId||m.w===rosterId||m.l===rosterId);
+    // Não está no winners_bracket = fora dos playoffs de título
+    const missedLabel=lang==='en'?'Missed Playoffs':lang==='es'?'Sin Playoffs':'Fora dos Playoffs';
     
-    if(inLosersBracket && losers?.length){
-        const myLosersMatches=losers.filter(m=>m.w===rosterId||m.l===rosterId||m.t1===rosterId||m.t2===rosterId);
-        
-        // Verificar posições definidas no losers bracket
-        for(const m of myLosersMatches){
-            if(m.p && (m.w===rosterId||m.l===rosterId)){
-                const pos=m.w===rosterId?m.p:m.p+1;
-                return{position:pos,label:`${pos}${t('place')}`,madePlayoffs:false};
-            }
-        }
-    }
-    
-    // Fall back to regular season standings
+    // Calcular posição na temporada regular para referência
     const sorted=[...rosters].sort((a,b)=>{
         const aWins=a.settings?.wins||0,bWins=b.settings?.wins||0;
         const aPf=a.settings?.fpts||0,bPf=b.settings?.fpts||0;
         return bWins-aWins||bPf-aPf;
     });
     const pos=sorted.findIndex(r=>r.roster_id===rosterId)+1;
-    return{position:pos,label:`${pos}${t('place')}`,madePlayoffs:false};
+    return{position:pos,label:missedLabel,madePlayoffs:false};
 }
 
 function renderHistoryPanel(){
