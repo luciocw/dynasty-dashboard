@@ -39,7 +39,8 @@
         .remember-me{margin-top:.75rem;display:flex;align-items:center;justify-content:center;gap:.5rem;color:var(--text-secondary);font-size:.8rem}
         .remember-me input{accent-color:var(--accent)}
         .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.75rem;margin-bottom:1rem}
-        .stat-card{background:var(--bg-secondary);border-radius:8px;padding:.75rem;text-align:center;border:1px solid var(--border);cursor:pointer;transition:all .2s}
+        .stat-card{background:var(--bg-secondary);border-radius:8px;padding:.75rem;text-align:center;border:1px solid var(--border);transition:all .2s}
+        .stat-card.clickable{cursor:pointer}.stat-card.clickable:hover{border-color:var(--accent);background:var(--bg-card)}
         .stat-card:hover{border-color:var(--accent)}
         .stat-value{font-size:1.3rem;font-weight:600;color:var(--accent)}
         .stat-label{font-size:.65rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px}
@@ -193,6 +194,7 @@
         .league-record{text-align:right}
         .record-value{font-size:1.1rem;font-weight:600}
         .record-label{font-size:.65rem;color:var(--text-secondary)}
+        .record-label.avg-age{color:var(--accent);font-weight:500}
         .lineup-section{padding:.4rem .6rem;border-bottom:1px solid var(--border);background:var(--bg-card)}
         .lineup-title{font-size:.6rem;font-weight:600;text-transform:uppercase;color:var(--text-secondary);margin-bottom:.25rem}
         .lineup-grid{display:flex;flex-wrap:wrap;gap:.2rem}
@@ -361,6 +363,8 @@ const i18n = {
         posExposure: 'Exposição por Posição',
         standings: 'Standings',
         history: 'Histórico',
+        titles: 'Títulos',
+        avgAge: 'Idade Média',
         champion: 'Campeão',
         runnerUp: 'Vice',
         thirdPlace: '3º Lugar',
@@ -445,6 +449,8 @@ const i18n = {
         posExposure: 'Position Exposure',
         standings: 'Standings',
         history: 'History',
+        titles: 'Titles',
+        avgAge: 'Avg Age',
         champion: 'Champion',
         runnerUp: 'Runner-up',
         thirdPlace: '3rd Place',
@@ -529,6 +535,8 @@ const i18n = {
         posExposure: 'Exposición por Posición',
         standings: 'Clasificación',
         history: 'Historial',
+        titles: 'Títulos',
+        avgAge: 'Edad Media',
         champion: 'Campeón',
         runnerUp: 'Subcampeón',
         thirdPlace: '3er Lugar',
@@ -723,6 +731,23 @@ function sortLeagues(ls){return[...ls].sort((a,b)=>{
     return a.name.localeCompare(b.name)
 })}
 function getStats(){const f=getFiltered();let w=0,lo=0,t=0;f.forEach(l=>{if(l.myRoster?.settings){w+=l.myRoster.settings.wins||0;lo+=l.myRoster.settings.losses||0;t+=l.myRoster.settings.ties||0}});return{total:f.length,dynasty:leagues.filter(l=>getType(l)==='dynasty').length,redraft:leagues.filter(l=>getType(l)==='redraft').length,keeper:leagues.filter(l=>getType(l)==='keeper').length,wins:w,losses:lo,ties:t,pct:w+lo>0?((w/(w+lo))*100).toFixed(1):0}}
+
+function getTitlesCount(){
+    let count=0;
+    Object.values(seasonHistory).forEach(yearData=>{
+        if(yearData?.length){
+            count+=yearData.filter(d=>d.isChamp).length;
+        }
+    });
+    return count;
+}
+
+function getAvgAge(roster){
+    if(!roster?.players?.length)return null;
+    const ages=roster.players.map(id=>getAge(players[id])).filter(a=>a!==null);
+    if(!ages.length)return null;
+    return(ages.reduce((a,b)=>a+b,0)/ages.length).toFixed(1);
+}
 
 // Injury alerts
 function getInjuredPlayers(){
@@ -1131,6 +1156,7 @@ function renderDash(){
         <div class="stat-card"><div class="stat-value">${st.dynasty}</div><div class="stat-label">${t('dynasty')}</div></div>
         <div class="stat-card"><div class="stat-value">${st.wins}-${st.losses}</div><div class="stat-label">${t('record')}</div></div>
         <div class="stat-card"><div class="stat-value">${st.pct}%</div><div class="stat-label">${t('winRate')}</div></div>
+        <div class="stat-card clickable" onclick="togglePanel('history')"><div class="stat-value">🏆 ${getTitlesCount()}</div><div class="stat-label">${t('titles')}</div></div>
     </div>
     
     <div class="controls-row">
@@ -1185,6 +1211,7 @@ function renderCard(l){
     const totalGames=wins+losses;
     const winPct=totalGames>0?((wins/totalGames)*100).toFixed(1):null;
     const pf=ro?.settings?.fpts?(ro.settings.fpts+(ro.settings.fpts_decimal||0)/100).toFixed(1):null;
+    const avgAge=getAvgAge(ro);
     const byPos={},rp=ro?.players||[],taxi=ro?.taxi||[],ir=ro?.reserve||[];
     rp.forEach(id=>{const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:ir.includes(id)?'IR':taxi.includes(id)?'TAXI':null})}});
     taxi.forEach(id=>{if(!rp.includes(id)){const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:'TAXI'})}}});
@@ -1198,7 +1225,7 @@ function renderCard(l){
             <div class="league-avatar">${l.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${l.avatar}">`:'🏈'}</div>
             <div class="league-info"><div class="league-name" title="${l.name}">${l.name}</div><div class="league-meta"><span class="league-badge badge-${ty}">${ty}</span>${se.map(s=>`<span class="league-badge badge-setting">${s}</span>`).join('')}</div></div>
             <div class="league-actions"><button class="icon-btn" onclick="exportRoster('${l.league_id}')" title="${t('export')}" style="width:28px;height:28px;font-size:.8rem">📄</button></div>
-            <div class="league-record"><div class="record-value">${rec}</div>${winPct?`<div class="record-label">${winPct}%</div>`:''}${pf?`<div class="record-label">${pf} PF</div>`:''}</div>
+            <div class="league-record"><div class="record-value">${rec}</div>${winPct?`<div class="record-label">${winPct}%</div>`:''}${pf?`<div class="record-label">${pf} PF</div>`:''}${avgAge?`<div class="record-label avg-age">⌀ ${avgAge}</div>`:''}</div>
         </div>
         ${lineupHtml}
         <div class="roster-section">${sorted.map(pos=>`<div class="position-group"><div class="position-header">${pos}<span class="position-count">${byPos[pos].length}</span></div><div class="players-list">${byPos[pos].sort((a,b)=>(a.search_rank||9999)-(b.search_rank||9999)).map(p=>{
