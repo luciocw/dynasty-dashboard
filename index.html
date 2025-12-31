@@ -322,11 +322,15 @@
                     <button class="capital-toggle" onclick="toggleCapitalDetails()">${showCapitalDetails?'▲ Ocultar':'▼ Por Liga'}</button>
                 </div>
                 <div class="capital-summary">
-                    ${years.map(y=>`<div class="capital-year">
+                    ${years.map(y=>{
+                        const yr=cap.byYear[y];
+                        const details=[];
+                        for(let r=1;r<=5;r++){if(yr[`r${r}`]>0)details.push(`${yr[`r${r}`]}×R${r}`);}
+                        return`<div class="capital-year">
                         <div class="capital-year-label">${y}</div>
-                        <div class="capital-year-value">${cap.byYear[y].total} picks</div>
-                        <div class="capital-year-detail">${cap.byYear[y].r1}×R1 ${cap.byYear[y].r2}×R2 ${cap.byYear[y].r3}×R3</div>
-                    </div>`).join('')}
+                        <div class="capital-year-value">${yr.total} picks</div>
+                        <div class="capital-year-detail">${details.slice(0,3).join(' ')}</div>
+                    </div>`;}).join('')}
                     <div class="capital-year">
                         <div class="capital-year-label">Total</div>
                         <div class="capital-year-value">${cap.totalPicks}</div>
@@ -504,7 +508,7 @@
         let picks='';if(ty==='dynasty'){const mp=getPicks(l);if(mp.length)picks=`<div class="picks-section"><div class="picks-title">Draft Picks</div><div class="picks-grid">${mp.map(p=>`<span class="pick-badge ${p.own?'own':'extra'}" title="${p.note||''}">${p.label}</span>`).join('')}</div></div>`}
         return`<div class="league-card${hasSearched?' highlight':''}"><div class="league-header"><div class="league-avatar">${l.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${l.avatar}">`:'🏈'}</div><div class="league-info"><div class="league-name" title="${l.name}">${l.name}</div><div class="league-meta"><span class="league-badge badge-${ty}">${ty}</span>${se.map(s=>`<span class="league-badge badge-setting">${s}</span>`).join('')}</div></div><div class="league-actions"><button class="export-btn" onclick="exportRoster('${l.league_id}')" title="Exportar MD">📄</button></div><div class="league-record"><div class="record-value">${rec}</div>${pts?`<div class="record-label">${pts} pts</div>`:''}</div></div>${lineupHtml}<div class="roster-section">${sorted.map(pos=>`<div class="position-group"><div class="position-header">${pos}<span class="position-count">${byPos[pos].length}</span></div><div class="players-list">${byPos[pos].sort((a,b)=>(a.search_rank||9999)-(b.search_rank||9999)).map(p=>{const isSearched=playerSearch&&(p.full_name||'').toLowerCase().includes(playerSearch.toLowerCase());return`<div class="player-row${isSearched?' searched':''}"><span class="player-pos pos-${pos.toLowerCase()}">${p.displayPos||pos}</span><span class="player-name">${p.full_name||p.first_name+' '+p.last_name}</span><span class="player-team">${p.team||'FA'}</span>${p.status?`<span class="player-status status-${p.status.toLowerCase()}">${p.status}</span>`:''}</div>`}).join('')}</div></div>`).join('')}</div>${picks}</div>`}
         
-        function getPicks(l){const picks=[],tp=l.tradedPicks||[],rid=l.myRoster?.roster_id;if(!rid)return picks;const cs=parseInt(l.season);for(let y=cs+1;y<=cs+3;y++){for(let r=1;r<=5;r++){const traded=tp.find(t=>t.season===String(y)&&t.round===r&&t.roster_id===rid&&t.owner_id!==rid);if(!traded)picks.push({label:`'${String(y).slice(-2)} R${r}`,own:true,note:'Sua'});const acq=tp.filter(t=>t.season===String(y)&&t.round===r&&t.owner_id===rid&&t.roster_id!==rid);acq.forEach(t=>{const oo=l.rosters?.find(x=>x.roster_id===t.roster_id),ou=l.users?.find(u=>u.user_id===oo?.owner_id);picks.push({label:`'${String(y).slice(-2)} R${r}`,own:false,note:ou?.display_name||'Adq'})})}}return picks.sort((a,b)=>{const[ay,ar]=a.label.match(/\d+/g),[by,br]=b.label.match(/\d+/g);return ay-by||ar-br})}
+        function getPicks(l){const picks=[],tp=l.tradedPicks||[],rid=l.myRoster?.roster_id;if(!rid)return picks;const cs=parseInt(l.season);const maxRounds=l.settings?.draft_rounds||4;for(let y=cs+1;y<=cs+3;y++){for(let r=1;r<=maxRounds;r++){const traded=tp.find(t=>t.season===String(y)&&t.round===r&&t.roster_id===rid&&t.owner_id!==rid);if(!traded)picks.push({label:`'${String(y).slice(-2)} R${r}`,own:true,note:'Sua'});const acq=tp.filter(t=>t.season===String(y)&&t.round===r&&t.owner_id===rid&&t.roster_id!==rid);acq.forEach(t=>{const oo=l.rosters?.find(x=>x.roster_id===t.roster_id),ou=l.users?.find(u=>u.user_id===oo?.owner_id);picks.push({label:`'${String(y).slice(-2)} R${r}`,own:false,note:ou?.display_name||'Adq'})})}}return picks.sort((a,b)=>{const[ay,ar]=a.label.match(/\d+/g),[by,br]=b.label.match(/\d+/g);return ay-by||ar-br})}
         
         function exportRoster(leagueId){const l=leagues.find(x=>x.league_id===leagueId);if(!l)return;const md=generateMarkdown(l);document.getElementById('modalTitle').textContent=`Exportar: ${l.name}`;document.getElementById('modalContent').textContent=md;document.getElementById('modalOverlay').classList.add('active')}
         function generateMarkdown(l){const ty=getType(l),se=getSettings(l),ro=l.myRoster,rec=ro?.settings?`${ro.settings.wins||0}-${ro.settings.losses||0}${ro.settings.ties?`-${ro.settings.ties}`:''}`:'-';
