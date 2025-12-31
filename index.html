@@ -597,7 +597,7 @@ async function handleSearch(){
     }catch(e){renderSearch();showErr(e.message)}
 }
 
-async function loadLeagues(forceRefresh=false){
+async function loadLeagues(forceRefresh=false,specificYear=null){
     if(forceRefresh)clearCache();
     showLoad(t('loadingPlayers'));
     if(!Object.keys(players).length){
@@ -605,13 +605,25 @@ async function loadLeagues(forceRefresh=false){
     }
     showLoad(t('loadingLeagues'));
     leagues=[];
-    for(const s of['2026','2025','2024','2023']){
+    
+    if(specificYear){
+        // Carregar ano específico selecionado pelo usuário
         try{
-            const r=await fetch(`${API}/user/${user.user_id}/leagues/nfl/${s}`);
+            const r=await fetch(`${API}/user/${user.user_id}/leagues/nfl/${specificYear}`);
             const l=await r.json();
-            if(l?.length){year=s;leagues=l;break}
+            if(l?.length){year=specificYear;leagues=l}
         }catch(e){}
+    }else{
+        // Auto-detectar ano mais recente com ligas
+        for(const s of['2026','2025','2024','2023']){
+            try{
+                const r=await fetch(`${API}/user/${user.user_id}/leagues/nfl/${s}`);
+                const l=await r.json();
+                if(l?.length){year=s;leagues=l;break}
+            }catch(e){}
+        }
     }
+    
     if(!leagues.length){renderSearch();showErr(t('noLeagues'));return}
     showLoad(`${t('loadingDetails')} (${leagues.length})...`);
     for(let i=0;i<leagues.length;i+=5){await Promise.all(leagues.slice(i,i+5).map(loadDetails))}
@@ -967,7 +979,7 @@ function renderDash(){
                 <option value="winpct" ${sortBy==='winpct'?'selected':''}>${t('sortWinPct')}</option>
                 <option value="points" ${sortBy==='points'?'selected':''}>${t('sortPoints')}</option>
             </select>
-            <select class="mini-select" onchange="year=this.value;loadLeagues(true)">
+            <select class="mini-select" onchange="loadLeagues(true,this.value)">
                 <option value="2026" ${year==='2026'?'selected':''}>2026</option>
                 <option value="2025" ${year==='2025'?'selected':''}>2025</option>
                 <option value="2024" ${year==='2024'?'selected':''}>2024</option>
