@@ -700,17 +700,22 @@ function getPowerRankings(leagueId){
     if(!l)return[];
     return(l.rosters||[]).map(r=>{
         const u=l.users?.find(x=>x.user_id===r.owner_id);
+        const wins=r.settings?.wins||0;
+        const losses=r.settings?.losses||0;
+        const totalGames=wins+losses;
+        const winPct=totalGames>0?((wins/totalGames)*100):0;
         return{
             name:u?.display_name||'Team',
             oderId:r.owner_id,
             isMe:r.owner_id===user.user_id,
-            wins:r.settings?.wins||0,
-            losses:r.settings?.losses||0,
+            wins,
+            losses,
+            winPct,
             pf:r.settings?.fpts||0,
             pa:r.settings?.fpts_against||0,
             players:r.players?.length||0
         };
-    }).sort((a,b)=>b.pf-a.pf);
+    }).sort((a,b)=>b.winPct-a.winPct||b.pf-a.pf);
 }
 
 // Trades
@@ -760,15 +765,16 @@ function renderTradesPanel(){
     let content=`<div style="color:var(--text-secondary);font-size:.8rem">${t('selectLeague')}</div>`;
     if(selectedLeague){
         const ts=getMyTrades(selectedLeague);
+        const myRosterId=leagues.find(l=>l.league_id===selectedLeague)?.myRoster?.roster_id;
         if(ts.length){
             const dateLang=lang==='en'?'en-US':lang==='es'?'es-ES':'pt-BR';
             content=`<div class="trades-list">${ts.map(tr=>{
                 const date=new Date(tr.created).toLocaleDateString(dateLang);
                 const adds=(tr.adds||{}),drops=(tr.drops||{});
-                const myAdds=Object.keys(adds).filter(id=>adds[id]===leagues.find(l=>l.league_id===selectedLeague)?.myRoster?.roster_id);
-                const myDrops=Object.keys(drops).filter(id=>drops[id]===leagues.find(l=>l.league_id===selectedLeague)?.myRoster?.roster_id);
-                const draftAdds=(tr.draft_picks||[]).filter(p=>p.owner_id===user.user_id);
-                const draftDrops=(tr.draft_picks||[]).filter(p=>p.previous_owner_id===user.user_id);
+                const myAdds=Object.keys(adds).filter(id=>adds[id]===myRosterId);
+                const myDrops=Object.keys(drops).filter(id=>drops[id]===myRosterId);
+                const draftAdds=(tr.draft_picks||[]).filter(p=>p.owner_id===myRosterId&&p.previous_owner_id!==myRosterId);
+                const draftDrops=(tr.draft_picks||[]).filter(p=>p.previous_owner_id===myRosterId&&p.owner_id!==myRosterId);
                 return`<div class="trade-item"><div class="trade-header"><span>${date}</span><span>${t('week')} ${tr.leg||'?'}</span></div>
                 <div class="trade-content"><div class="trade-side"><div class="trade-side-label">${t('received')}</div>${myAdds.map(id=>`<div class="trade-asset"><span class="trade-asset-type">🏃</span>${players[id]?.full_name||id}</div>`).join('')}${draftAdds.map(p=>`<div class="trade-asset"><span class="trade-asset-type">📋</span>'${String(p.season).slice(-2)} R${p.round}</div>`).join('')}</div>
                 <div class="trade-arrow">⇄</div>
@@ -786,9 +792,11 @@ function renderRankingsPanel(){
         const ranks=getPowerRankings(selectedLeague);
         const total=ranks.length;
         const youLabel=lang==='en'?' (you)':lang==='es'?' (tú)':' (você)';
-        content=`<div class="rankings-list">${ranks.map((r,i)=>{
+        const totalGames=ranks[0]?(ranks[0].wins+ranks[0].losses):0;
+        const seasonInfo=totalGames>0?`<div style="font-size:.7rem;color:var(--text-secondary);margin-bottom:.5rem">${lang==='en'?'Regular season':'Temporada regular'}: ${totalGames} ${lang==='en'?'games':'jogos'}</div>`:'';
+        content=`${seasonInfo}<div class="rankings-list">${ranks.map((r,i)=>{
             const posClass=i<3?'top3':i>=total-3?'bottom3':'mid';
-            return`<div class="ranking-item"><span class="ranking-pos ${posClass}">${i+1}</span><span class="ranking-team ${r.isMe?'me':''}">${r.name}${r.isMe?youLabel:''}</span><div class="ranking-stats"><div class="ranking-stat"><div class="ranking-stat-value">${r.wins}-${r.losses}</div><div>${t('record')}</div></div><div class="ranking-stat"><div class="ranking-stat-value">${r.pf.toFixed(0)}</div><div>PF</div></div></div></div>`}).join('')}</div>`;
+            return`<div class="ranking-item"><span class="ranking-pos ${posClass}">${i+1}</span><span class="ranking-team ${r.isMe?'me':''}">${r.name}${r.isMe?youLabel:''}</span><div class="ranking-stats"><div class="ranking-stat"><div class="ranking-stat-value">${r.wins}-${r.losses}</div><div>${t('record')}</div></div><div class="ranking-stat"><div class="ranking-stat-value">${r.winPct.toFixed(1)}%</div><div>Win%</div></div><div class="ranking-stat"><div class="ranking-stat-value">${r.pf.toFixed(0)}</div><div>PF</div></div></div></div>`}).join('')}</div>`;
     }
     return`<div class="panel show"><div class="panel-header"><div class="panel-title">🏆 ${t('powerRankings')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
     <div class="rankings-selector"><select class="mini-select" onchange="setSelectedLeague(this.value)"><option value="">${t('select')}</option>${opts}</select></div>${content}</div>`;
