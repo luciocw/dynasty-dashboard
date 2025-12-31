@@ -605,7 +605,7 @@ async function loadLeagues(forceRefresh=false){
     }
     showLoad(t('loadingLeagues'));
     leagues=[];
-    for(const s of['2025','2024','2023']){
+    for(const s of['2026','2025','2024','2023']){
         try{
             const r=await fetch(`${API}/user/${user.user_id}/leagues/nfl/${s}`);
             const l=await r.json();
@@ -968,6 +968,7 @@ function renderDash(){
                 <option value="points" ${sortBy==='points'?'selected':''}>${t('sortPoints')}</option>
             </select>
             <select class="mini-select" onchange="year=this.value;loadLeagues(true)">
+                <option value="2026" ${year==='2026'?'selected':''}>2026</option>
                 <option value="2025" ${year==='2025'?'selected':''}>2025</option>
                 <option value="2024" ${year==='2024'?'selected':''}>2024</option>
                 <option value="2023" ${year==='2023'?'selected':''}>2023</option>
