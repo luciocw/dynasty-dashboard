@@ -1189,8 +1189,7 @@ function renderDash(){
     const hasDyn=leagues.some(l=>getType(l)==='dynasty');
     const cache=getCache();
     const dateLang=lang==='en'?'en-US':lang==='es'?'es-ES':'pt-BR';
-    const cacheTime=cache?new Date(cache.timestamp).toLocaleTimeString(dateLang,{hour:'2-digit',minute:'2-digit'}):';
-    
+    const cacheTime=cache?new Date(cache.timestamp).toLocaleTimeString(dateLang,{hour:'2-digit',minute:'2-digit'}):'';    
     let panelHtml='';
     if(showPanel==='injury')panelHtml=renderInjuryPanel();
     else if(showPanel==='matchups')panelHtml=renderMatchupsPanel();
