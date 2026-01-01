@@ -1236,7 +1236,7 @@ function renderCard(l){
             <div class="league-record"><div class="record-value">${rec}</div>${winPct?`<div class="record-label">${winPct}%</div>`:''}${pf?`<div class="record-label">${pf} PF</div>`:''}${avgAge?`<div class="record-label avg-age">⌀ ${avgAge}</div>`:''}</div>
         </div>
         ${lineupHtml}
-        <div class="roster-section">${sorted.map(pos=>`<div class="position-group"><div class="position-header">${pos}<span class="position-count">${byPos[pos].length}</span></div><div class="players-list">${byPos[pos].sort((a,b)=>(a.search_rank||9999)-(b.search_rank||9999)).map(p=>{
+        <div class="roster-section">${sorted.map(pos=>`<div class="position-group"><div class="position-header">${pos}<span class="position-count">${byPos[pos].length}</span></div><div class="players-list">${byPos[pos].sort((a,b)=>{const statusOrder={null:0,undefined:0,IR:1,TAXI:2};const aOrder=statusOrder[a.status]??0;const bOrder=statusOrder[b.status]??0;if(aOrder!==bOrder)return aOrder-bOrder;return(a.search_rank||9999)-(b.search_rank||9999)}).map(p=>{
             const isSearched=playerSearch&&(p.full_name||'').toLowerCase().includes(playerSearch.toLowerCase());
             const isInj=p.injury_status&&['Out','Doubtful','Questionable','IR'].includes(p.injury_status);
             const age=getAge(p);
