@@ -115,6 +115,12 @@
         
         /* Exposure Panel */
         .exposure-grid{display:flex;flex-wrap:wrap;gap:.5rem}
+        .most-owned-list{display:flex;flex-direction:column;gap:.25rem}
+        .most-owned-item{display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;background:var(--bg-secondary);border-radius:6px}
+        .most-owned-rank{font-weight:700;color:var(--accent);min-width:1.5rem}
+        .most-owned-name{flex:1;font-weight:500}
+        .most-owned-team{color:var(--text-secondary);font-size:.8rem}
+        .most-owned-count{background:var(--accent-muted);color:var(--accent);padding:.15rem .4rem;border-radius:4px;font-size:.75rem;font-weight:600}
         .exposure-item{background:var(--bg-card);padding:.4rem .6rem;border-radius:6px;font-size:.75rem;display:flex;align-items:center;gap:.375rem}
         .exposure-pos{font-weight:600;color:var(--accent)}
         
@@ -195,6 +201,13 @@
         .record-value{font-size:1.1rem;font-weight:600}
         .record-label{font-size:.65rem;color:var(--text-secondary)}
         .record-label.avg-age{color:var(--accent);font-weight:500}
+        .record-label.avg-age.young{color:var(--success)}
+        .record-label.avg-age.old{color:var(--warning)}
+        .roster-stats{display:flex;gap:.5rem;align-items:center;font-size:.7rem;color:var(--text-secondary);padding:.25rem .5rem;background:var(--bg-secondary);border-radius:4px;margin:.25rem 0}
+        .roster-stats span{display:flex;align-items:center;gap:.2rem}
+        .rs-ir{color:var(--error)}.rs-taxi{color:var(--dynasty)}.rs-bye{color:var(--warning)}
+        .player-row.on-bye{opacity:.7}
+        .status-bye{background:var(--warning-muted);color:var(--warning)}
         .lineup-section{padding:.4rem .6rem;border-bottom:1px solid var(--border);background:var(--bg-card)}
         .lineup-title{font-size:.6rem;font-weight:600;text-transform:uppercase;color:var(--text-secondary);margin-bottom:.25rem}
         .lineup-grid{display:flex;flex-wrap:wrap;gap:.2rem}
@@ -362,6 +375,7 @@ const i18n = {
         compareRosters: 'Comparar Rosters',
         draftCapital: 'Draft Capital',
         posExposure: 'Exposição por Posição',
+        mostOwned: 'Mais Repetidos',
         standings: 'Standings',
         history: 'Histórico',
         titles: 'Títulos',
@@ -372,14 +386,21 @@ const i18n = {
         place: 'º Lugar',
         loadingHistory: 'Carregando histórico...',
         noHistory: 'Nenhum histórico encontrado',
+        noData: 'Sem dados',
         sortAZ: 'A-Z',
         sortRecord: 'Record',
         sortPoints: 'Pontos',
         sortWinPct: 'Win%',
+        allPositions: 'Posições',
         cards: 'Cards',
         list: 'Lista',
         dataVia: 'Dados via',
         developedBy: 'Desenvolvido por',
+        rosterComplete: 'Roster completo',
+        openSlots: 'vagas',
+        allRosters: 'Todos os Rosters',
+        exportedOn: 'Exportado em',
+        exportAll: 'Exportar Todos',
         codedBy: 'programado por',
         age: 'anos',
         lang: '🇧🇷'
@@ -450,6 +471,7 @@ const i18n = {
         compareRosters: 'Compare Rosters',
         draftCapital: 'Draft Capital',
         posExposure: 'Position Exposure',
+        mostOwned: 'Most Owned',
         standings: 'Standings',
         history: 'History',
         titles: 'Titles',
@@ -460,15 +482,22 @@ const i18n = {
         place: 'Place',
         loadingHistory: 'Loading history...',
         noHistory: 'No history found',
+        noData: 'No data',
         sortAZ: 'A-Z',
         sortRecord: 'Record',
         sortPoints: 'Points',
         sortWinPct: 'Win%',
+        allPositions: 'Positions',
         cards: 'Cards',
         list: 'List',
         dataVia: 'Data via',
         developedBy: 'Developed by',
         codedBy: 'coded by',
+        rosterComplete: 'Roster complete',
+        openSlots: 'open slots',
+        allRosters: 'All Rosters',
+        exportedOn: 'Exported on',
+        exportAll: 'Export All',
         age: 'y/o',
         lang: '🇺🇸'
     },
@@ -538,6 +567,7 @@ const i18n = {
         compareRosters: 'Comparar Rosters',
         draftCapital: 'Draft Capital',
         posExposure: 'Exposición por Posición',
+        mostOwned: 'Más Repetidos',
         standings: 'Clasificación',
         history: 'Historial',
         titles: 'Títulos',
@@ -548,15 +578,22 @@ const i18n = {
         place: '° Lugar',
         loadingHistory: 'Cargando historial...',
         noHistory: 'Sin historial',
+        noData: 'Sin datos',
         sortAZ: 'A-Z',
         sortRecord: 'Record',
         sortPoints: 'Puntos',
         sortWinPct: 'Win%',
+        allPositions: 'Posiciones',
         cards: 'Cards',
         list: 'Lista',
         dataVia: 'Datos via',
         developedBy: 'Desarrollado por',
         codedBy: 'programado por',
+        rosterComplete: 'Roster completo',
+        openSlots: 'vacantes',
+        allRosters: 'Todos los Rosters',
+        exportedOn: 'Exportado en',
+        exportAll: 'Exportar Todos',
         age: 'años',
         lang: '🇪🇸'
     }
@@ -568,7 +605,7 @@ function setLang(l) { lang = l; localStorage.setItem(LANG_KEY, l); renderDash();
 function initLang() { const saved = localStorage.getItem(LANG_KEY); if (saved && i18n[saved]) lang = saved; }
 
 let players={},user=null,leagues=[],matchups={},transactions={},seasonHistory={};
-let filter='all',view='cards',year='2025',theme='dark',sortBy='name',playerSearch='';
+let filter='all',view='cards',year='2025',theme='dark',sortBy='name',playerSearch='',positionFilter='all';
 let showPanel=null,selectedLeague=null,showCapitalDetails=false,compareLeagues=[null,null,null];
 const posOrder=['QB','RB','WR','TE','K','DEF','DL','LB','DB'];
 const byeWeeks={'ARI':14,'ATL':12,'BAL':14,'BUF':12,'CAR':7,'CHI':7,'CIN':8,'CLE':6,'DAL':7,'DEN':14,'DET':5,'GB':10,'HOU':14,'IND':14,'JAX':12,'KC':6,'LAC':5,'LAR':6,'LV':10,'MIA':6,'MIN':10,'NE':14,'NO':12,'NYG':11,'NYJ':12,'PHI':5,'PIT':9,'SEA':10,'SF':9,'TB':11,'TEN':5,'WAS':14};
@@ -1111,6 +1148,13 @@ function renderExposurePanel(){
     <div class="exposure-grid">${posOrder.filter(p=>exp[p]).map(p=>`<div class="exposure-item"><span class="exposure-pos">${p}</span><span>${exp[p]}</span></div>`).join('')}</div></div>`;
 }
 
+function renderMostOwnedPanel(){
+    const most=getMostOwnedPlayers();
+    if(!most.length)return`<div class="panel show"><div class="panel-header"><div class="panel-title">⭐ ${t('mostOwned')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div><div style="color:var(--text-secondary);font-size:.8rem">${t('noData')}</div></div>`;
+    return`<div class="panel show"><div class="panel-header"><div class="panel-title">⭐ ${t('mostOwned')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
+    <div class="most-owned-list">${most.map((p,i)=>`<div class="most-owned-item"><span class="most-owned-rank">${i+1}</span><span class="player-pos pos-${normalizePosition(p.player?.position).toLowerCase()}">${p.player?.position||'?'}</span><span class="most-owned-name">${p.player?.full_name||'Unknown'}</span><span class="most-owned-team">${p.player?.team||'FA'}</span><span class="most-owned-count">${p.count}x</span></div>`).join('')}</div></div>`;
+}
+
 // Main render
 function renderDash(){
     const st=getStats(),ls=getFiltered();
@@ -1131,6 +1175,7 @@ function renderDash(){
     else if(showPanel==='compare')panelHtml=renderComparePanel();
     else if(showPanel==='capital')panelHtml=renderCapitalPanel();
     else if(showPanel==='exposure')panelHtml=renderExposurePanel();
+    else if(showPanel==='mostOwned')panelHtml=renderMostOwnedPanel();
     
     document.getElementById('app').innerHTML=`
     <header>
@@ -1154,6 +1199,7 @@ function renderDash(){
         <div class="tool-chip ${showPanel==='compare'?'active':''}" onclick="togglePanel('compare')"><span class="chip-icon">⚖️</span>${t('compare')}</div>
         ${hasDyn?`<div class="tool-chip ${showPanel==='capital'?'active':''}" onclick="togglePanel('capital')"><span class="chip-icon">📋</span>${t('capital')}</div>`:''}
         <div class="tool-chip ${showPanel==='exposure'?'active':''}" onclick="togglePanel('exposure')"><span class="chip-icon">📈</span>${t('exposure')}</div>
+        <div class="tool-chip ${showPanel==='mostOwned'?'active':''}" onclick="togglePanel('mostOwned')"><span class="chip-icon">⭐</span>${t('mostOwned')}</div>
     </div>
     
     ${panelHtml}
@@ -1186,12 +1232,25 @@ function renderDash(){
                 <option value="winpct" ${sortBy==='winpct'?'selected':''}>${t('sortWinPct')}</option>
                 <option value="points" ${sortBy==='points'?'selected':''}>${t('sortPoints')}</option>
             </select>
+            <select class="mini-select" onchange="positionFilter=this.value;renderDash()">
+                <option value="all" ${positionFilter==='all'?'selected':''}>${t('allPositions')}</option>
+                <option value="QB" ${positionFilter==='QB'?'selected':''}>QB</option>
+                <option value="RB" ${positionFilter==='RB'?'selected':''}>RB</option>
+                <option value="WR" ${positionFilter==='WR'?'selected':''}>WR</option>
+                <option value="TE" ${positionFilter==='TE'?'selected':''}>TE</option>
+                <option value="K" ${positionFilter==='K'?'selected':''}>K</option>
+                <option value="DEF" ${positionFilter==='DEF'?'selected':''}>DEF</option>
+                <option value="DL" ${positionFilter==='DL'?'selected':''}>DL</option>
+                <option value="LB" ${positionFilter==='LB'?'selected':''}>LB</option>
+                <option value="DB" ${positionFilter==='DB'?'selected':''}>DB</option>
+            </select>
             <select class="mini-select" onchange="loadLeagues(true,this.value)">
                 <option value="2026" ${year==='2026'?'selected':''}>2026</option>
                 <option value="2025" ${year==='2025'?'selected':''}>2025</option>
                 <option value="2024" ${year==='2024'?'selected':''}>2024</option>
                 <option value="2023" ${year==='2023'?'selected':''}>2023</option>
             </select>
+            <button class="icon-btn" onclick="exportAllRosters()" title="${t('exportAll')}" style="font-size:.8rem">📥</button>
             <div class="view-toggle">
                 <button class="view-btn ${view==='cards'?'active':''}" onclick="view='cards';renderDash()">${t('cards')}</button>
                 <button class="view-btn ${view==='compact'?'active':''}" onclick="view='compact';renderDash()">${t('list')}</button>
@@ -1202,7 +1261,7 @@ function renderDash(){
     <div class="leagues-grid ${view}">${ls.map(l=>renderCard(l)).join('')}</div>
     
     <div class="footer">
-        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • ${year} • v1.4.0<br>
+        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • ${year} • v1.5.0<br>
         ${t('developedBy')} <strong>Lucio</strong>, ${t('codedBy')} <strong>Claude</strong> • <a href="https://x.com/luciocw" target="_blank" rel="noopener" class="twitter-link">𝕏 @luciocw</a><br>
         <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener" class="coffee-btn">☕ Buy me a coffee</a>
     </div>`;
@@ -1221,26 +1280,60 @@ function renderCard(l){
     const pf=ro?.settings?.fpts?(ro.settings.fpts+(ro.settings.fpts_decimal||0)/100).toFixed(1):null;
     const avgAge=getAvgAge(ro);
     const byPos={},rp=ro?.players||[],taxi=ro?.taxi||[],ir=ro?.reserve||[];
-    rp.forEach(id=>{const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:ir.includes(id)?'IR':taxi.includes(id)?'TAXI':null})}});
-    taxi.forEach(id=>{if(!rp.includes(id)){const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:'TAXI'})}}});
+    
+    // Contagem por status
+    const activeCount=rp.filter(id=>!taxi.includes(id)&&!ir.includes(id)).length;
+    const irCount=ir.length;
+    const taxiCount=taxi.length;
+    
+    // Roster completo check
+    const rosterSlots=(l.roster_positions||[]).filter(p=>p!=='BN').length;
+    const benchSlots=(l.roster_positions||[]).filter(p=>p==='BN').length;
+    const totalSlots=rosterSlots+benchSlots;
+    const rosterFull=activeCount>=totalSlots;
+    const rosterIcon=rosterFull?'✅':'⚠️';
+    const rosterTip=rosterFull?t('rosterComplete'):`${totalSlots-activeCount} ${t('openSlots')}`;
+    
+    // Bye week atual
+    const currentWeek=getCurrentWeek();
+    const playersOnBye=rp.filter(id=>{const p=players[id];return p?.team&&byeWeeks[p.team]===currentWeek}).length;
+    
+    // Idade média classificação
+    const ageClass=avgAge?(parseFloat(avgAge)<25?'young':parseFloat(avgAge)>27?'old':'mid'):'';
+    
+    rp.forEach(id=>{const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:ir.includes(id)?'IR':taxi.includes(id)?'TAXI':null,onBye:p.team&&byeWeeks[p.team]===currentWeek})}});
+    taxi.forEach(id=>{if(!rp.includes(id)){const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:'TAXI',onBye:p.team&&byeWeeks[p.team]===currentWeek})}}});
     const sorted=Object.keys(byPos).sort((a,b)=>posOrder.indexOf(a)-posOrder.indexOf(b));
     const hasSearched=playerSearch&&rp.some(id=>{const p=players[id];return p&&(p.full_name||'').toLowerCase().includes(playerSearch.toLowerCase())});
+    
+    // Filtro por posição
+    const posFiltered=positionFilter==='all'||sorted.includes(positionFilter);
+    if(positionFilter!=='all'&&!sorted.includes(positionFilter))return'';
+    
     const lineup=getLineup(l);
     const lineupHtml=lineup.length?`<div class="lineup-section"><div class="lineup-title">${t('lineup')}</div><div class="lineup-grid">${lineup.map(s=>{const cls=s.pos==='QB'?'qb':s.pos==='RB'?'rb':s.pos==='WR'?'wr':s.pos==='TE'?'te':['FLEX','REC_FLEX'].includes(s.pos)?'flex':s.pos==='SUPER_FLEX'?'sf':'def';return`<span class="lineup-slot slot-${cls}">${s.label}</span>`}).join('')}</div></div>`:'';
+    
+    // Roster stats line
+    const rosterStats=`<div class="roster-stats"><span title="${rosterTip}">${rosterIcon}</span><span>${activeCount}</span>${irCount?`<span class="rs-ir">${irCount} IR</span>`:''}${taxiCount?`<span class="rs-taxi">${taxiCount} TAXI</span>`:''}${playersOnBye?`<span class="rs-bye">${playersOnBye} BYE</span>`:''}</div>`;
+    
     let picks='';if(ty==='dynasty'){const mp=getPicks(l);if(mp.length)picks=`<div class="picks-section"><div class="picks-title">${t('draftPicks')}</div><div class="picks-grid">${mp.map(p=>`<span class="pick-badge ${p.own?'own':'extra'}" title="${p.note||''}">${p.label}</span>`).join('')}</div></div>`}
+    
+    const filteredPos=positionFilter==='all'?sorted:sorted.filter(p=>p===positionFilter);
+    
     return`<div class="league-card${hasSearched?' highlight':''}">
         <div class="league-header">
             <div class="league-avatar">${l.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${l.avatar}">`:'🏈'}</div>
             <div class="league-info"><div class="league-name" title="${l.name}">${l.name}</div><div class="league-meta"><span class="league-badge badge-${ty}">${ty}</span>${se.map(s=>`<span class="league-badge badge-setting">${s}</span>`).join('')}</div></div>
             <div class="league-actions"><button class="icon-btn" onclick="exportRoster('${l.league_id}')" title="${t('export')}" style="width:28px;height:28px;font-size:.8rem">📄</button></div>
-            <div class="league-record"><div class="record-value">${rec}</div>${winPct?`<div class="record-label">${winPct}%</div>`:''}${pf?`<div class="record-label">${pf} PF</div>`:''}${avgAge?`<div class="record-label avg-age">⌀ ${avgAge}</div>`:''}</div>
+            <div class="league-record"><div class="record-value">${rec}</div>${winPct?`<div class="record-label">${winPct}%</div>`:''}${pf?`<div class="record-label">${pf} PF</div>`:''}${avgAge?`<div class="record-label avg-age ${ageClass}">⌀ ${avgAge}</div>`:''}</div>
         </div>
         ${lineupHtml}
-        <div class="roster-section">${sorted.map(pos=>`<div class="position-group"><div class="position-header">${pos}<span class="position-count">${byPos[pos].length}</span></div><div class="players-list">${byPos[pos].sort((a,b)=>{const statusOrder={null:0,undefined:0,IR:1,TAXI:2};const aOrder=statusOrder[a.status]??0;const bOrder=statusOrder[b.status]??0;if(aOrder!==bOrder)return aOrder-bOrder;return(a.search_rank||9999)-(b.search_rank||9999)}).map(p=>{
+        ${rosterStats}
+        <div class="roster-section">${filteredPos.map(pos=>`<div class="position-group"><div class="position-header">${pos}<span class="position-count">${byPos[pos].length}</span></div><div class="players-list">${byPos[pos].sort((a,b)=>{const statusOrder={null:0,undefined:0,IR:1,TAXI:2};const aOrder=statusOrder[a.status]??0;const bOrder=statusOrder[b.status]??0;if(aOrder!==bOrder)return aOrder-bOrder;return(a.search_rank||9999)-(b.search_rank||9999)}).map(p=>{
             const isSearched=playerSearch&&(p.full_name||'').toLowerCase().includes(playerSearch.toLowerCase());
             const isInj=p.injury_status&&['Out','Doubtful','Questionable','IR'].includes(p.injury_status);
             const age=getAge(p);
-            return`<div class="player-row${isSearched?' searched':''}${isInj?' injured':''}"><span class="player-pos pos-${pos.toLowerCase()}">${p.displayPos||pos}</span><span class="player-name">${p.full_name||p.first_name+' '+p.last_name}</span><span class="player-team">${p.team||'FA'}</span>${age?`<span class="player-age">${age}</span>`:''}${isInj?`<span class="player-status status-inj">${p.injury_status}</span>`:''}${p.status?`<span class="player-status status-${p.status.toLowerCase()}">${p.status}</span>`:''}</div>`}).join('')}</div></div>`).join('')}</div>
+            return`<div class="player-row${isSearched?' searched':''}${isInj?' injured':''}${p.onBye?' on-bye':''}"><span class="player-pos pos-${pos.toLowerCase()}">${p.displayPos||pos}</span><span class="player-name">${p.full_name||p.first_name+' '+p.last_name}</span><span class="player-team">${p.team||'FA'}</span>${age?`<span class="player-age">${age}</span>`:''}${p.onBye?`<span class="player-status status-bye">BYE</span>`:''}${isInj?`<span class="player-status status-inj">${p.injury_status}</span>`:''}${p.status?`<span class="player-status status-${p.status.toLowerCase()}">${p.status}</span>`:''}</div>`}).join('')}</div></div>`).join('')}</div>
         ${picks}
     </div>`;
 }
@@ -1249,6 +1342,32 @@ function getPicks(l){const picks=[],tp=l.tradedPicks||[],rid=l.myRoster?.roster_
 
 function exportRoster(lid){const l=leagues.find(x=>x.league_id===lid);if(!l)return;document.getElementById('modalTitle').textContent=`${l.name}`;document.getElementById('modalContent').textContent=generateMarkdown(l);document.getElementById('modalOverlay').classList.add('active');document.getElementById('modalClose').textContent=t('close');document.getElementById('modalCopy').textContent=t('copy')}
 function generateMarkdown(l){const ty=getType(l),se=getSettings(l),ro=l.myRoster,rec=ro?.settings?`${ro.settings.wins||0}-${ro.settings.losses||0}`:'--';const byPos={},rp=ro?.players||[],taxi=ro?.taxi||[],ir=ro?.reserve||[];rp.forEach(id=>{const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,status:ir.includes(id)?'IR':taxi.includes(id)?'TAXI':null})}});taxi.forEach(id=>{if(!rp.includes(id)){const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,status:'TAXI'})}}});let md=`# ${l.name}\n**${ty}** | ${se.join(' | ')}\n**${t('record')}:** ${rec}\n\n`;posOrder.forEach(pos=>{if(byPos[pos]){md+=`## ${pos} (${byPos[pos].length})\n`;byPos[pos].forEach(p=>{md+=`- ${p.full_name} (${p.team||'FA'})${p.status?' ['+p.status+']':''}\n`});md+='\n'}});if(ty==='dynasty'){const picks=getPicks(l);if(picks.length){md+=`## ${t('draftPicks')}\n`;picks.forEach(p=>{md+=`- ${p.label} ${p.own?`(${t('own')})`:'('+p.note+')'}\n`})}}return md}
+
+function exportAllRosters(){
+    let md=`# ${t('allRosters')} - ${user.display_name||user.username}\n**${t('exportedOn')}:** ${new Date().toLocaleDateString()}\n**${t('leagues')}:** ${leagues.length}\n\n---\n\n`;
+    leagues.forEach(l=>{md+=generateMarkdown(l)+'\n---\n\n'});
+    document.getElementById('modalTitle').textContent=t('allRosters');
+    document.getElementById('modalContent').textContent=md;
+    document.getElementById('modalOverlay').classList.add('active');
+}
+
+function getMostOwnedPlayers(){
+    const count={};
+    leagues.forEach(l=>{
+        const rp=l.myRoster?.players||[];
+        rp.forEach(id=>{
+            if(!count[id])count[id]={id,count:0,leagues:[]};
+            count[id].count++;
+            count[id].leagues.push(l.name);
+        });
+    });
+    return Object.values(count)
+        .filter(p=>p.count>1)
+        .sort((a,b)=>b.count-a.count)
+        .slice(0,15)
+        .map(p=>({...p,player:players[p.id]}));
+}
+
 function closeModal(e){if(e&&e.target!==e.currentTarget)return;document.getElementById('modalOverlay').classList.remove('active')}
 function copyModalContent(){navigator.clipboard.writeText(document.getElementById('modalContent').textContent);showToast(t('copied'))}
 function showToast(m){const to=document.getElementById('toast');to.textContent=m;to.classList.add('show');setTimeout(()=>to.classList.remove('show'),2000)}
