@@ -117,6 +117,12 @@
         
         /* Standings Panel */
         .standings-list{display:flex;flex-direction:column;gap:.5rem}
+        .standings-header-row{display:flex;align-items:center;gap:.5rem;padding:0 .75rem .5rem;font-size:.65rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);margin-bottom:.25rem}
+        .standings-header-row span:first-child{width:1rem}
+        .standings-header-row span:nth-child(2){width:24px}
+        .standings-header-row span:nth-child(3){flex:1}
+        .standing-stats-header{display:flex;gap:.75rem}
+        .standing-stats-header span{min-width:2.5rem;text-align:right}
         .standing-item{background:var(--bg-card);border-radius:8px;overflow:hidden}
         .standing-header{display:flex;align-items:center;gap:.5rem;padding:.6rem .75rem;cursor:pointer;transition:background .2s}
         .standing-header:hover{background:var(--bg-secondary)}
@@ -216,9 +222,11 @@
         .badge-keeper{background:var(--keeper-muted);color:var(--keeper)}
         .badge-setting{background:var(--accent-muted);color:var(--accent)}
         .league-actions{display:flex;gap:.25rem}
-        .league-record{text-align:right}
+        .league-record{text-align:right;display:flex;flex-direction:column;gap:.15rem}
+        .record-labels{display:flex;gap:.5rem;justify-content:flex-end;font-size:.55rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.3px}
+        .record-values{display:flex;gap:.5rem;align-items:baseline;justify-content:flex-end}
         .record-value{font-size:1.1rem;font-weight:600}
-        .record-label{font-size:.65rem;color:var(--text-secondary)}
+        .record-label{font-size:.7rem;color:var(--text-secondary)}
         .record-label.avg-age{color:var(--accent);font-weight:500}
         .record-label.avg-age.young{color:var(--success)}
         .record-label.avg-age.old{color:var(--warning)}
@@ -336,6 +344,7 @@ const i18n = {
         rememberMe: 'Lembrar de mim',
         logout: 'Sair',
         leagues: 'Ligas',
+        league: 'Liga',
         dynasty: 'Dynasty',
         redraft: 'Redraft',
         keeper: 'Keeper',
@@ -433,6 +442,7 @@ const i18n = {
         rememberMe: 'Remember me',
         logout: 'Logout',
         leagues: 'Leagues',
+        league: 'League',
         dynasty: 'Dynasty',
         redraft: 'Redraft',
         keeper: 'Keeper',
@@ -530,6 +540,7 @@ const i18n = {
         rememberMe: 'Recordarme',
         logout: 'Salir',
         leagues: 'Ligas',
+        league: 'Liga',
         dynasty: 'Dynasty',
         redraft: 'Redraft',
         keeper: 'Keeper',
@@ -970,6 +981,7 @@ function renderStandingsPanel(){
     const youLabel=lang==='en'?' (you)':lang==='es'?' (tú)':' (você)';
     
     return`<div class="panel show"><div class="panel-header"><div class="panel-title">📊 ${t('standings')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
+    <div class="standings-header-row"><span></span><span></span><span>${t('league')}</span><div class="standing-stats-header"><span>${t('record')}</span><span>Win%</span><span>Pos</span></div></div>
     <div class="standings-list">${standingsData.map(s=>{
         const posClass=s.position<=3?'top3':s.position>s.total-3?'bottom3':'mid';
         const isExpanded=expandedStanding===s.leagueId;
@@ -1345,7 +1357,10 @@ function renderCard(l){
             <div class="league-avatar">${l.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${l.avatar}">`:'🏈'}</div>
             <div class="league-info"><div class="league-name" title="${l.name}">${l.name}</div><div class="league-meta"><span class="league-badge badge-${ty}">${ty}</span>${se.map(s=>`<span class="league-badge badge-setting">${s}</span>`).join('')}</div></div>
             <div class="league-actions"><button class="icon-btn" onclick="exportRoster('${l.league_id}')" title="${t('export')}" style="width:28px;height:28px;font-size:.8rem">📄</button></div>
-            <div class="league-record"><div class="record-value">${rec}</div>${winPct?`<div class="record-label">${winPct}%</div>`:''}${pf?`<div class="record-label">${pf} PF</div>`:''}${avgAge?`<div class="record-label avg-age ${ageClass}">⌀ ${avgAge}</div>`:''}</div>
+            <div class="league-record">
+                <div class="record-labels"><span>${t('record')}</span>${winPct?`<span>Win%</span>`:''}${pf?`<span>PF</span>`:''}${avgAge?`<span>${t('avgAge')}</span>`:''}</div>
+                <div class="record-values"><span class="record-value">${rec}</span>${winPct?`<span class="record-label">${winPct}%</span>`:''}${pf?`<span class="record-label">${pf}</span>`:''}${avgAge?`<span class="record-label avg-age ${ageClass}">⌀ ${avgAge}</span>`:''}</div>
+            </div>
         </div>
         ${lineupHtml}
         ${rosterStats}
@@ -1361,7 +1376,26 @@ function renderCard(l){
 function getPicks(l){const picks=[],tp=l.tradedPicks||[],rid=l.myRoster?.roster_id;if(!rid)return picks;const cs=parseInt(l.season);const maxR=l.settings?.draft_rounds||4;for(let y=cs+1;y<=cs+3;y++){for(let r=1;r<=maxR;r++){const traded=tp.find(t=>t.season===String(y)&&t.round===r&&t.roster_id===rid&&t.owner_id!==rid);if(!traded)picks.push({label:`'${String(y).slice(-2)} R${r}`,own:true,note:t('own')});const acq=tp.filter(t=>t.season===String(y)&&t.round===r&&t.owner_id===rid&&t.roster_id!==rid);acq.forEach(tx=>{const oo=l.rosters?.find(x=>x.roster_id===tx.roster_id),ou=l.users?.find(u=>u.user_id===oo?.owner_id);picks.push({label:`'${String(y).slice(-2)} R${r}`,own:false,note:ou?.display_name||t('acquired')})})}}return picks.sort((a,b)=>{const[ay,ar]=a.label.match(/\d+/g),[by,br]=b.label.match(/\d+/g);return ay-by||ar-br})}
 
 function exportRoster(lid){const l=leagues.find(x=>x.league_id===lid);if(!l)return;document.getElementById('modalTitle').textContent=`${l.name}`;document.getElementById('modalContent').textContent=generateMarkdown(l);document.getElementById('modalOverlay').classList.add('active');document.getElementById('modalClose').textContent=t('close');document.getElementById('modalCopy').textContent=t('copy')}
-function generateMarkdown(l){const ty=getType(l),se=getSettings(l),ro=l.myRoster,rec=ro?.settings?`${ro.settings.wins||0}-${ro.settings.losses||0}`:'--';const byPos={},rp=ro?.players||[],taxi=ro?.taxi||[],ir=ro?.reserve||[];rp.forEach(id=>{const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,status:ir.includes(id)?'IR':taxi.includes(id)?'TAXI':null})}});taxi.forEach(id=>{if(!rp.includes(id)){const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,status:'TAXI'})}}});let md=`# ${l.name}\n**${ty}** | ${se.join(' | ')}\n**${t('record')}:** ${rec}\n\n`;posOrder.forEach(pos=>{if(byPos[pos]){md+=`## ${pos} (${byPos[pos].length})\n`;byPos[pos].forEach(p=>{md+=`- ${p.full_name} (${p.team||'FA'})${p.status?' ['+p.status+']':''}\n`});md+='\n'}});if(ty==='dynasty'){const picks=getPicks(l);if(picks.length){md+=`## ${t('draftPicks')}\n`;picks.forEach(p=>{md+=`- ${p.label} ${p.own?`(${t('own')})`:'('+p.note+')'}\n`})}}return md}
+
+function generateMarkdown(l){
+    const ty=getType(l),se=getSettings(l),ro=l.myRoster;
+    const rec=ro?.settings?`${ro.settings.wins||0}-${ro.settings.losses||0}`:'--';
+    const lineup=getLineup(l);
+    const lineupStr=lineup.map(s=>s.label).join(' | ');
+    
+    const byPos={},rp=ro?.players||[],taxi=ro?.taxi||[],ir=ro?.reserve||[];
+    rp.forEach(id=>{const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,status:ir.includes(id)?'IR':taxi.includes(id)?'TAXI':null})}});
+    taxi.forEach(id=>{if(!rp.includes(id)){const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,status:'TAXI'})}}});
+    
+    let md=`# ${l.name}\n**${ty}** | ${se.join(' | ')}\n**${t('record')}:** ${rec}\n`;
+    if(lineupStr)md+=`**${t('lineup')}:** ${lineupStr}\n`;
+    md+='\n';
+    
+    posOrder.forEach(pos=>{if(byPos[pos]){md+=`## ${pos} (${byPos[pos].length})\n`;byPos[pos].forEach(p=>{md+=`- ${p.full_name} (${p.team||'FA'})${p.status?' ['+p.status+']':''}\n`});md+='\n'}});
+    
+    if(ty==='dynasty'){const picks=getPicks(l);if(picks.length){md+=`## ${t('draftPicks')}\n`;picks.forEach(p=>{md+=`- ${p.label} ${p.own?`(${t('own')})`:'('+p.note+')'}\n`})}}
+    return md;
+}
 
 function exportAllRosters(){
     let md=`# ${t('allRosters')} - ${user.display_name||user.username}\n**${t('exportedOn')}:** ${new Date().toLocaleDateString()}\n**${t('leagues')}:** ${leagues.length}\n\n---\n\n`;
