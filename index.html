@@ -103,6 +103,8 @@
         .rankings-selector select{padding:.4rem .75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);font-size:.8rem}
         .rankings-list{display:flex;flex-direction:column;gap:.375rem}
         .ranking-item{display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;background:var(--bg-card);border-radius:6px;font-size:.8rem}
+        .ranking-item.compact{padding:.35rem .5rem;font-size:.75rem;background:var(--bg-secondary)}
+        .ranking-item.compact .ranking-stats{gap:.5rem}
         .ranking-pos{width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-weight:600;font-size:.75rem}
         .ranking-pos.top3{background:var(--success-muted);color:var(--success)}
         .ranking-pos.bottom3{background:var(--error-muted);color:var(--error)}
@@ -112,6 +114,23 @@
         .ranking-stats{display:flex;gap:1rem;font-size:.7rem;color:var(--text-secondary)}
         .ranking-stat{text-align:center}
         .ranking-stat-value{font-weight:600;color:var(--text-primary)}
+        
+        /* Standings Panel */
+        .standings-list{display:flex;flex-direction:column;gap:.5rem}
+        .standing-item{background:var(--bg-card);border-radius:8px;overflow:hidden}
+        .standing-header{display:flex;align-items:center;gap:.5rem;padding:.6rem .75rem;cursor:pointer;transition:background .2s}
+        .standing-header:hover{background:var(--bg-secondary)}
+        .standing-expand{font-size:.6rem;color:var(--text-secondary);width:1rem}
+        .standing-name{flex:1;font-weight:500;font-size:.85rem}
+        .standing-stats{display:flex;gap:.75rem;font-size:.7rem;color:var(--text-secondary)}
+        .standing-stats span{min-width:2.5rem;text-align:right}
+        .standings-expanded{padding:.5rem;background:var(--bg-secondary);border-top:1px solid var(--border)}
+        .standing-item.expanded .standing-header{background:var(--bg-secondary)}
+        
+        /* Panel Sections */
+        .panel-section{margin-bottom:1rem}
+        .panel-section:last-child{margin-bottom:0}
+        .panel-subtitle{font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px}
         
         /* Exposure Panel */
         .exposure-grid{display:flex;flex-wrap:wrap;gap:.5rem}
@@ -375,6 +394,7 @@ const i18n = {
         compareRosters: 'Comparar Rosters',
         draftCapital: 'Draft Capital',
         posExposure: 'Exposição por Posição',
+        byPosition: 'Por Posição',
         mostOwned: 'Mais Repetidos',
         standings: 'Standings',
         history: 'Histórico',
@@ -471,6 +491,7 @@ const i18n = {
         compareRosters: 'Compare Rosters',
         draftCapital: 'Draft Capital',
         posExposure: 'Position Exposure',
+        byPosition: 'By Position',
         mostOwned: 'Most Owned',
         standings: 'Standings',
         history: 'History',
@@ -567,6 +588,7 @@ const i18n = {
         compareRosters: 'Comparar Rosters',
         draftCapital: 'Draft Capital',
         posExposure: 'Exposición por Posición',
+        byPosition: 'Por Posición',
         mostOwned: 'Más Repetidos',
         standings: 'Clasificación',
         history: 'Historial',
@@ -923,22 +945,8 @@ function renderTradesPanel(){
     <div style="margin-bottom:.75rem"><select class="mini-select" onchange="setSelectedLeague(this.value)"><option value="">${t('select')}</option>${opts}</select></div>${content}</div>`;
 }
 
-function renderRankingsPanel(){
-    const opts=leagues.map(l=>`<option value="${l.league_id}" ${selectedLeague===l.league_id?'selected':''}>${l.name}</option>`).join('');
-    let content=`<div style="color:var(--text-secondary);font-size:.8rem">${t('selectLeague')}</div>`;
-    if(selectedLeague){
-        const ranks=getPowerRankings(selectedLeague);
-        const total=ranks.length;
-        const youLabel=lang==='en'?' (you)':lang==='es'?' (tú)':' (você)';
-        const totalGames=ranks[0]?(ranks[0].wins+ranks[0].losses):0;
-        const seasonInfo=totalGames>0?`<div style="font-size:.7rem;color:var(--text-secondary);margin-bottom:.5rem">${lang==='en'?'Regular season':'Temporada regular'}: ${totalGames} ${lang==='en'?'games':'jogos'}</div>`:'';
-        content=`${seasonInfo}<div class="rankings-list">${ranks.map((r,i)=>{
-            const posClass=i<3?'top3':i>=total-3?'bottom3':'mid';
-            return`<div class="ranking-item"><span class="ranking-pos ${posClass}">${i+1}</span><span class="ranking-team ${r.isMe?'me':''}">${r.name}${r.isMe?youLabel:''}</span><div class="ranking-stats"><div class="ranking-stat"><div class="ranking-stat-value">${r.wins}-${r.losses}</div><div>${t('record')}</div></div><div class="ranking-stat"><div class="ranking-stat-value">${r.winPct.toFixed(1)}%</div><div>Win%</div></div><div class="ranking-stat"><div class="ranking-stat-value">${r.pf.toFixed(0)}</div><div>PF</div></div></div></div>`}).join('')}</div>`;
-    }
-    return`<div class="panel show"><div class="panel-header"><div class="panel-title">🏆 ${t('powerRankings')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
-    <div class="rankings-selector"><select class="mini-select" onchange="setSelectedLeague(this.value)"><option value="">${t('select')}</option>${opts}</select></div>${content}</div>`;
-}
+let expandedStanding=null;
+function toggleStandingExpand(leagueId){expandedStanding=expandedStanding===leagueId?null:leagueId;renderDash()}
 
 function renderStandingsPanel(){
     const standingsData=leagues.map(l=>{
@@ -954,15 +962,39 @@ function renderStandingsPanel(){
             wins:me?.wins||0,
             losses:me?.losses||0,
             winPct:me?.winPct||0,
-            pf:me?.pf||0
+            pf:me?.pf||0,
+            ranks
         };
     }).sort((a,b)=>a.position/a.total-b.position/b.total);
     
-    const posLabel=lang==='en'?'of':'de';
+    const youLabel=lang==='en'?' (you)':lang==='es'?' (tú)':' (você)';
+    
     return`<div class="panel show"><div class="panel-header"><div class="panel-title">📊 ${t('standings')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
-    <div class="rankings-list">${standingsData.map(s=>{
+    <div class="standings-list">${standingsData.map(s=>{
         const posClass=s.position<=3?'top3':s.position>s.total-3?'bottom3':'mid';
-        return`<div class="ranking-item"><span class="ranking-pos ${posClass}">${s.position}°</span><span class="ranking-team">${s.name}</span><div class="ranking-stats"><div class="ranking-stat"><div class="ranking-stat-value">${s.wins}-${s.losses}</div><div>${t('record')}</div></div><div class="ranking-stat"><div class="ranking-stat-value">${s.winPct.toFixed(1)}%</div><div>Win%</div></div><div class="ranking-stat"><div class="ranking-stat-value">${s.position}/${s.total}</div><div>Pos</div></div></div></div>`}).join('')}</div></div>`;
+        const isExpanded=expandedStanding===s.leagueId;
+        const expandIcon=isExpanded?'▼':'▶';
+        
+        let expandedHtml='';
+        if(isExpanded){
+            expandedHtml=`<div class="standings-expanded"><div class="rankings-list">${s.ranks.map((r,i)=>{
+                const rPosClass=i<3?'top3':i>=s.total-3?'bottom3':'mid';
+                return`<div class="ranking-item compact"><span class="ranking-pos ${rPosClass}">${i+1}</span><span class="ranking-team ${r.isMe?'me':''}">${r.name}${r.isMe?youLabel:''}</span><div class="ranking-stats"><span>${r.wins}-${r.losses}</span><span>${r.winPct.toFixed(0)}%</span><span>${r.pf.toFixed(0)}pf</span></div></div>`}).join('')}</div></div>`;
+        }
+        
+        return`<div class="standing-item ${isExpanded?'expanded':''}">
+            <div class="standing-header" onclick="toggleStandingExpand('${s.leagueId}')">
+                <span class="standing-expand">${expandIcon}</span>
+                <span class="ranking-pos ${posClass}">${s.position}°</span>
+                <span class="standing-name">${s.name}</span>
+                <div class="standing-stats">
+                    <span>${s.wins}-${s.losses}</span>
+                    <span>${s.winPct.toFixed(0)}%</span>
+                    <span>${s.position}/${s.total}</span>
+                </div>
+            </div>
+            ${expandedHtml}
+        </div>`}).join('')}</div></div>`;
 }
 
 // Season History Functions
@@ -1144,15 +1176,10 @@ function renderCapitalPanel(){
 
 function renderExposurePanel(){
     const exp=getExposure();
-    return`<div class="panel show"><div class="panel-header"><div class="panel-title">📈 ${t('posExposure')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
-    <div class="exposure-grid">${posOrder.filter(p=>exp[p]).map(p=>`<div class="exposure-item"><span class="exposure-pos">${p}</span><span>${exp[p]}</span></div>`).join('')}</div></div>`;
-}
-
-function renderMostOwnedPanel(){
     const most=getMostOwnedPlayers();
-    if(!most.length)return`<div class="panel show"><div class="panel-header"><div class="panel-title">⭐ ${t('mostOwned')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div><div style="color:var(--text-secondary);font-size:.8rem">${t('noData')}</div></div>`;
-    return`<div class="panel show"><div class="panel-header"><div class="panel-title">⭐ ${t('mostOwned')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
-    <div class="most-owned-list">${most.map((p,i)=>`<div class="most-owned-item"><span class="most-owned-rank">${i+1}</span><span class="player-pos pos-${normalizePosition(p.player?.position).toLowerCase()}">${p.player?.position||'?'}</span><span class="most-owned-name">${p.player?.full_name||'Unknown'}</span><span class="most-owned-team">${p.player?.team||'FA'}</span><span class="most-owned-count">${p.count}x</span></div>`).join('')}</div></div>`;
+    const mostHtml=most.length?`<div class="panel-section"><div class="panel-subtitle">⭐ ${t('mostOwned')}</div><div class="most-owned-list">${most.map((p,i)=>`<div class="most-owned-item"><span class="most-owned-rank">${i+1}</span><span class="player-pos pos-${normalizePosition(p.player?.position).toLowerCase()}">${p.player?.position||'?'}</span><span class="most-owned-name">${p.player?.full_name||'Unknown'}</span><span class="most-owned-team">${p.player?.team||'FA'}</span><span class="most-owned-count">${p.count}x</span></div>`).join('')}</div></div>`:'';
+    return`<div class="panel show"><div class="panel-header"><div class="panel-title">📈 ${t('exposure')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
+    <div class="panel-section"><div class="panel-subtitle">${t('byPosition')}</div><div class="exposure-grid">${posOrder.filter(p=>exp[p]).map(p=>`<div class="exposure-item"><span class="exposure-pos">${p}</span><span>${exp[p]}</span></div>`).join('')}</div></div>${mostHtml}</div>`;
 }
 
 // Main render
@@ -1162,20 +1189,17 @@ function renderDash(){
     const hasDyn=leagues.some(l=>getType(l)==='dynasty');
     const cache=getCache();
     const dateLang=lang==='en'?'en-US':lang==='es'?'es-ES':'pt-BR';
-    const cacheTime=cache?new Date(cache.timestamp).toLocaleTimeString(dateLang,{hour:'2-digit',minute:'2-digit'}):'';
+    const cacheTime=cache?new Date(cache.timestamp).toLocaleTimeString(dateLang,{hour:'2-digit',minute:'2-digit'}):';
     
     let panelHtml='';
     if(showPanel==='injury')panelHtml=renderInjuryPanel();
     else if(showPanel==='matchups')panelHtml=renderMatchupsPanel();
     else if(showPanel==='trades')panelHtml=renderTradesPanel();
-    else if(showPanel==='rankings')panelHtml=renderRankingsPanel();
     else if(showPanel==='standings')panelHtml=renderStandingsPanel();
     else if(showPanel==='history')panelHtml=renderHistoryPanel();
     else if(showPanel==='bye')panelHtml=renderByePanel();
-    else if(showPanel==='compare')panelHtml=renderComparePanel();
     else if(showPanel==='capital')panelHtml=renderCapitalPanel();
     else if(showPanel==='exposure')panelHtml=renderExposurePanel();
-    else if(showPanel==='mostOwned')panelHtml=renderMostOwnedPanel();
     
     document.getElementById('app').innerHTML=`
     <header>
@@ -1192,14 +1216,11 @@ function renderDash(){
     <div class="tools-bar">
         <div class="tool-chip ${showPanel==='matchups'?'active':''}" onclick="togglePanel('matchups')"><span class="chip-icon">🏈</span>${t('matchups')}</div>
         ${hasDyn?`<div class="tool-chip ${showPanel==='trades'?'active':''}" onclick="togglePanel('trades')"><span class="chip-icon">🔄</span>${t('trades')}</div>`:''}
-        <div class="tool-chip ${showPanel==='rankings'?'active':''}" onclick="togglePanel('rankings')"><span class="chip-icon">🏆</span>${t('rankings')}</div>
+        ${hasDyn?`<div class="tool-chip ${showPanel==='capital'?'active':''}" onclick="togglePanel('capital')"><span class="chip-icon">📋</span>${t('draftPicks')}</div>`:''}
         <div class="tool-chip ${showPanel==='standings'?'active':''}" onclick="togglePanel('standings')"><span class="chip-icon">📊</span>${t('standings')}</div>
         <div class="tool-chip ${showPanel==='history'?'active':''}" onclick="togglePanel('history')"><span class="chip-icon">📜</span>${t('history')}</div>
         <div class="tool-chip ${showPanel==='bye'?'active':''}" onclick="togglePanel('bye')"><span class="chip-icon">📅</span>${t('byeWeeks')}</div>
-        <div class="tool-chip ${showPanel==='compare'?'active':''}" onclick="togglePanel('compare')"><span class="chip-icon">⚖️</span>${t('compare')}</div>
-        ${hasDyn?`<div class="tool-chip ${showPanel==='capital'?'active':''}" onclick="togglePanel('capital')"><span class="chip-icon">📋</span>${t('capital')}</div>`:''}
         <div class="tool-chip ${showPanel==='exposure'?'active':''}" onclick="togglePanel('exposure')"><span class="chip-icon">📈</span>${t('exposure')}</div>
-        <div class="tool-chip ${showPanel==='mostOwned'?'active':''}" onclick="togglePanel('mostOwned')"><span class="chip-icon">⭐</span>${t('mostOwned')}</div>
     </div>
     
     ${panelHtml}
@@ -1261,7 +1282,7 @@ function renderDash(){
     <div class="leagues-grid ${view}">${ls.map(l=>renderCard(l)).join('')}</div>
     
     <div class="footer">
-        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • ${year} • v1.5.0<br>
+        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • ${year} • v1.6.0<br>
         ${t('developedBy')} <strong>Lucio</strong>, ${t('codedBy')} <strong>Claude</strong> • <a href="https://x.com/luciocw" target="_blank" rel="noopener" class="twitter-link">𝕏 @luciocw</a><br>
         <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener" class="coffee-btn">☕ Buy me a coffee</a>
     </div>`;
