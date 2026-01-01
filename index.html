@@ -1307,9 +1307,11 @@ function renderCard(l){
     const ty=getType(l),se=getSettings(l),ro=l.myRoster;
     const wins=ro?.settings?.wins||0,losses=ro?.settings?.losses||0;
     const rec=ro?.settings?`${wins}-${losses}`:'--';
+    // Mantemos o calculo caso precise no futuro, mas nao usamos no HTML abaixo
     const totalGames=wins+losses;
-    const winPct=totalGames>0?((wins/totalGames)*100).toFixed(1):null;
+    const winPct=totalGames>0?((wins/totalGames)*100).toFixed(1):null; 
     const pf=ro?.settings?.fpts?(ro.settings.fpts+(ro.settings.fpts_decimal||0)/100).toFixed(1):null;
+    
     const avgAge=getAvgAge(ro);
     const byPos={},rp=ro?.players||[],taxi=ro?.taxi||[],ir=ro?.reserve||[];
     
@@ -1352,14 +1354,18 @@ function renderCard(l){
     
     const filteredPos=positionFilter==='all'?sorted:sorted.filter(p=>p===positionFilter);
     
+    // --- ALTERAÇÃO AQUI: Cabeçalho limpo (Sem Win% e PF) ---
     return`<div class="league-card${hasSearched?' highlight':''}">
         <div class="league-header">
             <div class="league-avatar">${l.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${l.avatar}">`:'🏈'}</div>
-            <div class="league-info"><div class="league-name" title="${l.name}">${l.name}</div><div class="league-meta"><span class="league-badge badge-${ty}">${ty}</span>${se.map(s=>`<span class="league-badge badge-setting">${s}</span>`).join('')}</div></div>
+            <div class="league-info" style="min-width: 0; flex: 1; padding-right: 5px;">
+                <div class="league-name" title="${l.name}">${l.name}</div>
+                <div class="league-meta"><span class="league-badge badge-${ty}">${ty}</span>${se.map(s=>`<span class="league-badge badge-setting">${s}</span>`).join('')}</div>
+            </div>
             <div class="league-actions"><button class="icon-btn" onclick="exportRoster('${l.league_id}')" title="${t('export')}" style="width:28px;height:28px;font-size:.8rem">📄</button></div>
             <div class="league-record">
-                <div class="record-labels"><span>${t('record')}</span>${winPct?`<span>Win%</span>`:''}${pf?`<span>PF</span>`:''}${avgAge?`<span>${t('avgAge')}</span>`:''}</div>
-                <div class="record-values"><span class="record-value">${rec}</span>${winPct?`<span class="record-label">${winPct}%</span>`:''}${pf?`<span class="record-label">${pf}</span>`:''}${avgAge?`<span class="record-label avg-age ${ageClass}">⌀ ${avgAge}</span>`:''}</div>
+                <div class="record-labels"><span>${t('record')}</span>${avgAge?`<span>${t('avgAge')}</span>`:''}</div>
+                <div class="record-values"><span class="record-value">${rec}</span>${avgAge?`<span class="record-label avg-age ${ageClass}">⌀ ${avgAge}</span>`:''}</div>
             </div>
         </div>
         ${lineupHtml}
