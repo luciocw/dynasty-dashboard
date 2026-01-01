@@ -20,7 +20,7 @@
         header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
         h1{font-size:1.4rem;font-weight:600;display:flex;align-items:center;gap:.5rem}
         .header-right{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
-        .icon-btn{background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-secondary);padding:.5rem;border-radius:8px;cursor:pointer;font-size:1rem;transition:all .2s;width:36px;height:36px;display:flex;align-items:center;justify-content:center}
+        .icon-btn{background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-secondary);padding:.5rem;border-radius:8px;cursor:pointer;font-size:1rem;transition:all .2s;width:36px;height:36px;display:flex;align-items:center;justify-content:center;position:relative}
         .icon-btn:hover{border-color:var(--accent);color:var(--accent)}
         .icon-btn.active{background:var(--accent);border-color:var(--accent);color:white}
         .icon-btn.danger{color:var(--error)}
@@ -174,16 +174,6 @@
         .bye-week-count{font-size:1rem;font-weight:600}
         .bye-players{margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border)}
         
-        /* Compare Panel */
-        .compare-selector{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem}
-        .compare-selector select{padding:.4rem .75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);font-size:.8rem;min-width:140px}
-        .compare-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:.75rem}
-        .compare-column{background:var(--bg-card);border-radius:8px;padding:.75rem;max-height:400px;overflow-y:auto}
-        .compare-column-title{font-size:.85rem;font-weight:600;margin-bottom:.5rem;padding-bottom:.375rem;border-bottom:1px solid var(--border)}
-        .compare-pos-group{margin-bottom:.5rem}
-        .compare-pos-header{font-size:.65rem;font-weight:600;color:var(--text-secondary);margin-bottom:.25rem}
-        .compare-player{font-size:.75rem;padding:.15rem 0}
-        
         /* Controls */
         .controls-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem}
         .filters{display:flex;gap:.375rem;flex-wrap:wrap}
@@ -313,15 +303,15 @@
         .cache-info{font-size:.7rem;color:var(--text-secondary);margin-left:.5rem}
         .refresh-btn{font-size:.7rem;color:var(--accent);background:none;border:none;cursor:pointer;text-decoration:underline}
         
-        @media(max-width:600px){.container{padding:1rem}.leagues-grid{grid-template-columns:1fr}.stats-bar{grid-template-columns:repeat(2,1fr)}.controls-row{flex-direction:column;align-items:stretch}.controls-right{justify-content:space-between}.matchups-grid{grid-template-columns:1fr}.compare-grid{grid-template-columns:1fr}}
+        @media(max-width:600px){.container{padding:1rem}.leagues-grid{grid-template-columns:1fr}.stats-bar{grid-template-columns:repeat(2,1fr)}.controls-row{flex-direction:column;align-items:stretch}.controls-right{justify-content:space-between}.matchups-grid{grid-template-columns:1fr}}
     </style>
 </head>
 <body>
     <div class="container"><div id="app"></div></div>
-    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal" onclick="event.stopPropagation()">
-            <div class="modal-header"><div class="modal-title" id="modalTitle">Modal</div><button class="modal-close" onclick="closeModal()">&times;</button></div>
-            <div class="modal-content" id="modalContent"></div>
+            <div class="modal-header"><div class="modal-title" id="modalTitle">Modal</div><button class="modal-close" onclick="closeModal()" aria-label="Fechar modal">&times;</button></div>
+            <div class="modal-content" id="modalContent" aria-live="polite"></div>
             <div class="modal-actions"><button class="modal-btn secondary" onclick="closeModal()" id="modalClose">Fechar</button><button class="modal-btn primary" onclick="copyModalContent()" id="modalCopy">Copiar</button></div>
         </div>
     </div>
@@ -333,6 +323,11 @@ const USER_KEY='dynasty_user';
 const THEME_KEY='dynasty_theme';
 const LANG_KEY='dynasty_lang';
 const CACHE_HOURS=4;
+const APP_VERSION='1.6.1';
+const CURRENT_YEAR=new Date().getFullYear().toString();
+
+// Utility: escape HTML to prevent XSS
+function escapeHtml(str){if(!str)return'';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 // Internationalization
 const i18n = {
@@ -355,7 +350,6 @@ const i18n = {
         trades: 'Trades',
         rankings: 'Rankings',
         byeWeeks: 'Bye Weeks',
-        compare: 'Comparar',
         capital: 'Capital',
         exposure: 'Exposição',
         injuries: 'Lesões',
@@ -400,7 +394,6 @@ const i18n = {
         injuryAlerts: 'Alertas de Lesão',
         tradeHistory: 'Histórico de Trades',
         powerRankings: 'Power Rankings',
-        compareRosters: 'Comparar Rosters',
         draftCapital: 'Draft Capital',
         posExposure: 'Exposição por Posição',
         byPosition: 'Por Posição',
@@ -453,7 +446,6 @@ const i18n = {
         trades: 'Trades',
         rankings: 'Rankings',
         byeWeeks: 'Bye Weeks',
-        compare: 'Compare',
         capital: 'Capital',
         exposure: 'Exposure',
         injuries: 'Injuries',
@@ -498,7 +490,6 @@ const i18n = {
         injuryAlerts: 'Injury Alerts',
         tradeHistory: 'Trade History',
         powerRankings: 'Power Rankings',
-        compareRosters: 'Compare Rosters',
         draftCapital: 'Draft Capital',
         posExposure: 'Position Exposure',
         byPosition: 'By Position',
@@ -551,7 +542,6 @@ const i18n = {
         trades: 'Trades',
         rankings: 'Rankings',
         byeWeeks: 'Bye Weeks',
-        compare: 'Comparar',
         capital: 'Capital',
         exposure: 'Exposición',
         injuries: 'Lesiones',
@@ -596,7 +586,6 @@ const i18n = {
         injuryAlerts: 'Alertas de Lesión',
         tradeHistory: 'Historial de Trades',
         powerRankings: 'Power Rankings',
-        compareRosters: 'Comparar Rosters',
         draftCapital: 'Draft Capital',
         posExposure: 'Exposición por Posición',
         byPosition: 'Por Posición',
@@ -638,18 +627,46 @@ function setLang(l) { lang = l; localStorage.setItem(LANG_KEY, l); renderDash();
 function initLang() { const saved = localStorage.getItem(LANG_KEY); if (saved && i18n[saved]) lang = saved; }
 
 let players={},user=null,leagues=[],matchups={},transactions={},seasonHistory={};
-let filter='all',view='cards',year='2025',theme='dark',sortBy='name',playerSearch='',positionFilter='all';
-let showPanel=null,selectedLeague=null,showCapitalDetails=false,compareLeagues=[null,null,null];
+let filter='all',view='cards',year=CURRENT_YEAR,theme='dark',sortBy='name',playerSearch='',positionFilter='all';
+let showPanel=null,selectedLeague=null,showCapitalDetails=false;
 const posOrder=['QB','RB','WR','TE','K','DEF','DL','LB','DB'];
-const byeWeeks={'ARI':14,'ATL':12,'BAL':14,'BUF':12,'CAR':7,'CHI':7,'CIN':8,'CLE':6,'DAL':7,'DEN':14,'DET':5,'GB':10,'HOU':14,'IND':14,'JAX':12,'KC':6,'LAC':5,'LAR':6,'LV':10,'MIA':6,'MIN':10,'NE':14,'NO':12,'NYG':11,'NYJ':12,'PHI':5,'PIT':9,'SEA':10,'SF':9,'TB':11,'TEN':5,'WAS':14};
-const HISTORY_YEARS=['2025','2024','2023','2022','2021','2020'];
+// #4 - Bye weeks por ano (atualizar anualmente ou buscar de API)
+const byeWeeksByYear={
+    '2025':{'ARI':14,'ATL':12,'BAL':14,'BUF':12,'CAR':7,'CHI':7,'CIN':8,'CLE':6,'DAL':7,'DEN':14,'DET':5,'GB':10,'HOU':14,'IND':14,'JAX':12,'KC':6,'LAC':5,'LAR':6,'LV':10,'MIA':6,'MIN':10,'NE':14,'NO':12,'NYG':11,'NYJ':12,'PHI':5,'PIT':9,'SEA':10,'SF':9,'TB':11,'TEN':5,'WAS':14},
+    '2026':{'ARI':14,'ATL':12,'BAL':14,'BUF':12,'CAR':7,'CHI':7,'CIN':8,'CLE':6,'DAL':7,'DEN':14,'DET':5,'GB':10,'HOU':14,'IND':14,'JAX':12,'KC':6,'LAC':5,'LAR':6,'LV':10,'MIA':6,'MIN':10,'NE':14,'NO':12,'NYG':11,'NYJ':12,'PHI':5,'PIT':9,'SEA':10,'SF':9,'TB':11,'TEN':5,'WAS':14}
+};
+function getByeWeeks(){return byeWeeksByYear[year]||byeWeeksByYear['2025']||{}}
+// #14 - HISTORY_YEARS calculado dinamicamente
+function getHistoryYears(){const curr=parseInt(CURRENT_YEAR);return Array.from({length:6},(_,i)=>String(curr-i))}
 
 function normalizePosition(pos){if(!pos)return'?';if(['CB','S','FS','SS'].includes(pos))return'DB';if(['DE','DT','NT'].includes(pos))return'DL';if(['OLB','ILB','MLB'].includes(pos))return'LB';return pos;}
 
-// Cache functions
-function getCache(){try{const c=localStorage.getItem(CACHE_KEY);if(!c)return null;const d=JSON.parse(c);if(Date.now()-d.timestamp>CACHE_HOURS*60*60*1000)return null;return d}catch(e){return null}}
-function setCache(data){try{localStorage.setItem(CACHE_KEY,JSON.stringify({...data,timestamp:Date.now()}))}catch(e){}}
-function clearCache(){localStorage.removeItem(CACHE_KEY)}
+// Cache functions with improved error handling
+function getCache(){
+    try{
+        const c=localStorage.getItem(CACHE_KEY);
+        if(!c)return null;
+        const d=JSON.parse(c);
+        if(Date.now()-d.timestamp>CACHE_HOURS*60*60*1000)return null;
+        return d;
+    }catch(e){
+        console.warn('Cache read error:',e.message);
+        try{localStorage.removeItem(CACHE_KEY)}catch(e2){}
+        return null;
+    }
+}
+function setCache(data){
+    try{
+        const str=JSON.stringify({...data,timestamp:Date.now()});
+        localStorage.setItem(CACHE_KEY,str);
+    }catch(e){
+        if(e.name==='QuotaExceededError'){
+            console.warn('Storage quota exceeded, clearing old data');
+            try{localStorage.removeItem(CACHE_KEY)}catch(e2){}
+        }else{console.warn('Cache write error:',e.message)}
+    }
+}
+function clearCache(){try{localStorage.removeItem(CACHE_KEY)}catch(e){}}
 
 // Theme
 function initTheme(){const s=localStorage.getItem(THEME_KEY);if(s)theme=s;else if(window.matchMedia?.('(prefers-color-scheme:light)').matches)theme='light';document.documentElement.setAttribute('data-theme',theme)}
@@ -697,19 +714,22 @@ function renderSearch(){
         </div>
         <label class="remember-me"><input type="checkbox" id="rememberMe" checked>${t('rememberMe')}</label>
     </div>
-    <div class="footer">${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.3.0</div>`;
+    <div class="footer">${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v${APP_VERSION}</div>`;
     document.getElementById('usernameInput').addEventListener('keypress',e=>{if(e.key==='Enter')handleSearch()});
     document.getElementById('usernameInput').focus();
 }
 
 async function handleSearch(){
-    const u=document.getElementById('usernameInput').value.trim();
+    let u=document.getElementById('usernameInput').value.trim();
     if(!u)return;
+    // #9 - Sanitizar input: apenas alfanuméricos e underscore (padrão Sleeper)
+    u=u.replace(/[^a-zA-Z0-9_]/g,'');
+    if(!u||u.length>25)return;
     const b=document.getElementById('searchBtn');
     b.disabled=true;b.textContent='...';
     try{
         showLoad(t('loadingUser'));
-        const r=await fetch(`${API}/user/${u}`);
+        const r=await fetch(`${API}/user/${encodeURIComponent(u)}`);
         if(!r.ok)throw new Error(t('userNotFound'));
         user=await r.json();
         if(document.getElementById('rememberMe')?.checked)localStorage.setItem(USER_KEY,JSON.stringify(user));
@@ -721,7 +741,11 @@ async function loadLeagues(forceRefresh=false,specificYear=null){
     if(forceRefresh)clearCache();
     showLoad(t('loadingPlayers'));
     if(!Object.keys(players).length){
-        try{const r=await fetch(`${API}/players/nfl`);players=await r.json()}catch(e){}
+        try{
+            const r=await fetch(`${API}/players/nfl`);
+            if(!r.ok)throw new Error('Players API failed');
+            players=await r.json();
+        }catch(e){console.warn('Failed to load players:',e.message)}
     }
     showLoad(t('loadingLeagues'));
     leagues=[];
@@ -730,17 +754,15 @@ async function loadLeagues(forceRefresh=false,specificYear=null){
         // Carregar ano específico selecionado pelo usuário
         try{
             const r=await fetch(`${API}/user/${user.user_id}/leagues/nfl/${specificYear}`);
-            const l=await r.json();
-            if(l?.length){year=specificYear;leagues=l}
-        }catch(e){}
+            if(r.ok){const l=await r.json();if(l?.length){year=specificYear;leagues=l}}
+        }catch(e){console.warn('Failed to load leagues for year:',specificYear,e.message)}
     }else{
         // Auto-detectar ano mais recente com ligas
         for(const s of['2026','2025','2024','2023']){
             try{
                 const r=await fetch(`${API}/user/${user.user_id}/leagues/nfl/${s}`);
-                const l=await r.json();
-                if(l?.length){year=s;leagues=l;break}
-            }catch(e){}
+                if(r.ok){const l=await r.json();if(l?.length){year=s;leagues=l;break}}
+            }catch(e){console.warn('Failed to check year:',s,e.message)}
         }
     }
     
@@ -754,7 +776,8 @@ async function loadLeagues(forceRefresh=false,specificYear=null){
 async function loadDetails(l){
     try{
         const[ros,usr]=await Promise.all([fetch(`${API}/league/${l.league_id}/rosters`),fetch(`${API}/league/${l.league_id}/users`)]);
-        l.rosters=await ros.json();l.users=await usr.json();
+        if(ros.ok)l.rosters=await ros.json();else l.rosters=[];
+        if(usr.ok)l.users=await usr.json();else l.users=[];
         l.myRoster=l.rosters.find(r=>r.owner_id===user.user_id);
         if(getType(l)==='dynasty'){
             try{const t=await fetch(`${API}/league/${l.league_id}/traded_picks`);l.tradedPicks=await t.json()}catch(e){l.tradedPicks=[]}
@@ -787,7 +810,9 @@ async function loadTransactions(leagueId){
     }catch(e){transactions[leagueId]=[]}
 }
 
-function getCurrentWeek(){const now=new Date();const seasonStart=new Date('2025-09-04');if(now<seasonStart)return 1;return Math.min(18,Math.ceil((now-seasonStart)/(7*24*60*60*1000)))}
+// #3 - Season start é primeira quinta-feira de setembro do ano atual
+function getSeasonStart(yr){const sept=new Date(yr,8,1);const day=sept.getDay();const firstThurs=day<=4?5-day:12-day;return new Date(yr,8,firstThurs)}
+function getCurrentWeek(){const now=new Date();const yr=parseInt(year)||new Date().getFullYear();const seasonStart=getSeasonStart(yr);if(now<seasonStart)return 1;return Math.min(18,Math.ceil((now-seasonStart)/(7*24*60*60*1000)))}
 function showLoad(m){document.getElementById('app').innerHTML=`<header><h1>🏈 ${t('title')}</h1><button class="icon-btn" onclick="toggleTheme()">${theme==='dark'?'☀️':'🌙'}</button></header><div class="loading"><div class="spinner"></div><div>${m}</div></div>`}
 function showErr(m){const d=document.createElement('div');d.className='error-message';d.textContent=m;document.querySelector('.search-section')?.appendChild(d)}
 function logout(){localStorage.removeItem(USER_KEY);clearCache();user=null;leagues=[];renderSearch()}
@@ -877,7 +902,7 @@ function getPowerRankings(leagueId){
         const winPct=totalGames>0?((wins/totalGames)*100):0;
         return{
             name:u?.display_name||'Team',
-            oderId:r.owner_id,
+            ownerId:r.owner_id,
             isMe:r.owner_id===user.user_id,
             wins,
             losses,
@@ -908,7 +933,7 @@ function getDraftCapital(){
     Object.keys(byLeague).forEach(id=>{const d=byLeague[id].count-avg;byLeague[id].status=d>2?'rich':d<-2?'poor':'avg';byLeague[id].diff=d});
     return{byYear,byLeague,avg:avg.toFixed(1),total};
 }
-function getByeData(lid){const l=leagues.find(x=>x.league_id===lid);if(!l)return{};const wd={};for(let w=1;w<=18;w++)wd[w]=[];(l.myRoster?.players||[]).forEach(id=>{const p=players[id];if(p?.team&&byeWeeks[p.team])wd[byeWeeks[p.team]].push({name:p.full_name,pos:p.position,team:p.team})});return wd}
+function getByeData(lid){const l=leagues.find(x=>x.league_id===lid);if(!l)return{};const wd={};const bw=getByeWeeks();for(let w=1;w<=18;w++)wd[w]=[];(l.myRoster?.players||[]).forEach(id=>{const p=players[id];if(p?.team&&bw[p.team])wd[bw[p.team]].push({name:p.full_name,pos:p.position,team:p.team})});return wd}
 
 // Panel toggles
 function togglePanel(p){showPanel=showPanel===p?null:p;if(p==='matchups'&&!Object.keys(matchups).length)loadMatchups();else if(p==='trades'&&selectedLeague)loadTransactions(selectedLeague).then(renderDash);else if(p==='history'&&!Object.keys(seasonHistory).length){renderDash();loadSeasonHistory()}else renderDash()}
@@ -919,7 +944,7 @@ function renderInjuryPanel(){
     const inj=getInjuredPlayers();
     if(!inj.length)return`<div class="panel show"><div class="panel-header"><div class="panel-title">🏥 ${t('injuryAlerts')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div><div style="color:var(--text-secondary);font-size:.8rem">${t('noInjuries')}</div></div>`;
     return`<div class="panel show"><div class="panel-header"><div class="panel-title">🏥 ${t('injuryAlerts')} <span style="color:var(--error)">(${inj.length})</span></div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
-    <div class="injury-list">${inj.map(p=>`<div class="injury-item ${p.injury_status.toLowerCase()}"><span class="player-pos pos-${normalizePosition(p.position).toLowerCase()}">${p.position}</span><span class="injury-player">${p.full_name}</span><span class="injury-status ${p.injury_status.toLowerCase()}">${p.injury_status}</span><span class="injury-league">${p.leagueName}</span></div>`).join('')}</div></div>`;
+    <div class="injury-list">${inj.map(p=>`<div class="injury-item ${p.injury_status.toLowerCase()}"><span class="player-pos pos-${normalizePosition(p.position).toLowerCase()}">${p.position}</span><span class="injury-player">${escapeHtml(p.full_name)}</span><span class="injury-status ${p.injury_status.toLowerCase()}">${p.injury_status}</span><span class="injury-league">${escapeHtml(p.leagueName)}</span></div>`).join('')}</div></div>`;
 }
 
 function renderMatchupsPanel(){
@@ -928,7 +953,7 @@ function renderMatchupsPanel(){
     const wins=ms.filter(m=>m.myScore>m.oppScore).length;
     const losses=ms.filter(m=>m.myScore<m.oppScore).length;
     return`<div class="panel show"><div class="panel-header"><div class="panel-title">🏈 ${t('matchups')} ${t('week')} ${getCurrentWeek()} <span style="color:var(--success)">${wins}W</span>-<span style="color:var(--error)">${losses}L</span></div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
-    <div class="matchups-grid">${ms.map(m=>{const status=m.myScore>m.oppScore?'winning':m.myScore<m.oppScore?'losing':'tie';return`<div class="matchup-card ${status}"><div class="matchup-league">${m.league}</div><div class="matchup-teams"><div class="matchup-team"><div class="matchup-name">${t('you')}</div><div class="matchup-score ${status==='winning'?'winning':''}">${m.myScore.toFixed(1)}</div></div><div class="matchup-vs">vs</div><div class="matchup-team"><div class="matchup-name">${m.oppName}</div><div class="matchup-score ${status==='losing'?'losing':''}">${m.oppScore.toFixed(1)}</div></div></div></div>`}).join('')}</div></div>`;
+    <div class="matchups-grid">${ms.map(m=>{const status=m.myScore>m.oppScore?'winning':m.myScore<m.oppScore?'losing':'tie';return`<div class="matchup-card ${status}"><div class="matchup-league">${escapeHtml(m.league)}</div><div class="matchup-teams"><div class="matchup-team"><div class="matchup-name">${t('you')}</div><div class="matchup-score ${status==='winning'?'winning':''}">${m.myScore.toFixed(1)}</div></div><div class="matchup-vs">vs</div><div class="matchup-team"><div class="matchup-name">${escapeHtml(m.oppName)}</div><div class="matchup-score ${status==='losing'?'losing':''}">${m.oppScore.toFixed(1)}</div></div></div></div>`}).join('')}</div></div>`;
 }
 
 function renderTradesPanel(){
@@ -1013,7 +1038,7 @@ function renderStandingsPanel(){
 async function loadSeasonHistory(){
     if(Object.keys(seasonHistory).length)return;
     
-    for(const yr of HISTORY_YEARS){
+    for(const yr of getHistoryYears()){
         try{
             const r=await fetch(`${API}/user/${user.user_id}/leagues/nfl/${yr}`);
             const leaguesList=await r.json();
@@ -1167,18 +1192,6 @@ function showByePlayers(lid,week){
 
 function renderComparePanel(){
     const opts=leagues.map(l=>`<option value="${l.league_id}">${l.name}</option>`).join('');
-    const leagueLabel=lang==='en'?'League':lang==='es'?'Liga':'Liga';
-    const cols=compareLeagues.filter(id=>id).map(id=>{
-        const l=leagues.find(x=>x.league_id===id);if(!l)return'';
-        const byPos={};(l.myRoster?.players||[]).forEach(pid=>{const p=players[pid];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push(p)}});
-        return`<div class="compare-column"><div class="compare-column-title">${l.name}</div>${posOrder.filter(pos=>byPos[pos]).map(pos=>`<div class="compare-pos-group"><div class="compare-pos-header">${pos} (${byPos[pos].length})</div>${byPos[pos].slice(0,8).map(p=>`<div class="compare-player">${p.full_name} <span style="color:var(--text-secondary);font-size:.65rem">${p.team||'FA'}</span></div>`).join('')}</div>`).join('')}</div>`;
-    }).join('');
-    return`<div class="panel show"><div class="panel-header"><div class="panel-title">⚖️ ${t('compareRosters')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
-    <div class="compare-selector">${[0,1,2].map(i=>`<select class="mini-select" onchange="setCompareLeague(${i},this.value)"><option value="">${leagueLabel} ${i+1}</option>${leagues.map(l=>`<option value="${l.league_id}" ${compareLeagues[i]===l.league_id?'selected':''}>${l.name}</option>`).join('')}</select>`).join('')}</div>
-    <div class="compare-grid">${cols}</div></div>`;
-}
-function setCompareLeague(i,v){compareLeagues[i]=v||null;renderDash()}
-
 function renderCapitalPanel(){
     const cap=getDraftCapital();const years=Object.keys(cap.byYear).sort();
     return`<div class="panel show"><div class="panel-header"><div class="panel-title">📊 ${t('draftCapital')}</div><button class="capital-toggle" style="background:none;border:none;color:var(--accent);font-size:.75rem;cursor:pointer" onclick="showCapitalDetails=!showCapitalDetails;renderDash()">${showCapitalDetails?'▲':'▼'}</button><button class="panel-close" onclick="togglePanel(null)">×</button></div>
@@ -1219,7 +1232,7 @@ function renderDash(){
             ${renderLangSelector()}
             <button class="icon-btn" onclick="toggleTheme()" title="Theme">${theme==='dark'?'☀️':'🌙'}</button>
             <button class="icon-btn ${inj.length?'danger':''}" onclick="togglePanel('injury')" title="${t('injuries')}" style="position:relative">🏥${inj.length?`<span class="badge">${inj.length}</span>`:''}</button>
-            <div class="user-info">${user.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${user.avatar}" class="user-avatar">`:''}${user.display_name||user.username}</div>
+            <div class="user-info">${user.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${escapeHtml(user.avatar)}" class="user-avatar">`:''}${escapeHtml(user.display_name||user.username)}</div>
             <button class="icon-btn" onclick="logout()" title="${t('logout')}">🚪</button>
         </div>
     </header>
@@ -1328,13 +1341,14 @@ function renderCard(l){
     
     // Bye week atual
     const currentWeek=getCurrentWeek();
-    const playersOnBye=rp.filter(id=>{const p=players[id];return p?.team&&byeWeeks[p.team]===currentWeek}).length;
+    const bw=getByeWeeks();
+    const playersOnBye=rp.filter(id=>{const p=players[id];return p?.team&&bw[p.team]===currentWeek}).length;
     
     // Idade média classificação
     const ageClass=avgAge?(parseFloat(avgAge)<25?'young':parseFloat(avgAge)>27?'old':'mid'):'';
     
-    rp.forEach(id=>{const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:ir.includes(id)?'IR':taxi.includes(id)?'TAXI':null,onBye:p.team&&byeWeeks[p.team]===currentWeek})}});
-    taxi.forEach(id=>{if(!rp.includes(id)){const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:'TAXI',onBye:p.team&&byeWeeks[p.team]===currentWeek})}}});
+    rp.forEach(id=>{const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:ir.includes(id)?'IR':taxi.includes(id)?'TAXI':null,onBye:p.team&&bw[p.team]===currentWeek})}});
+    taxi.forEach(id=>{if(!rp.includes(id)){const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:'TAXI',onBye:p.team&&bw[p.team]===currentWeek})}}});
     const sorted=Object.keys(byPos).sort((a,b)=>posOrder.indexOf(a)-posOrder.indexOf(b));
     const hasSearched=playerSearch&&rp.some(id=>{const p=players[id];return p&&(p.full_name||'').toLowerCase().includes(playerSearch.toLowerCase())});
     
@@ -1354,9 +1368,9 @@ function renderCard(l){
     
     return`<div class="league-card${hasSearched?' highlight':''}">
         <div class="league-header">
-            <div class="league-avatar">${l.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${l.avatar}">`:'🏈'}</div>
-            <div class="league-info"><div class="league-name" title="${l.name}">${l.name}</div><div class="league-meta"><span class="league-badge badge-${ty}">${ty}</span>${se.map(s=>`<span class="league-badge badge-setting">${s}</span>`).join('')}</div></div>
-            <div class="league-actions"><button class="icon-btn" onclick="exportRoster('${l.league_id}')" title="${t('export')}" style="width:28px;height:28px;font-size:.8rem">📄</button></div>
+            <div class="league-avatar">${l.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${escapeHtml(l.avatar)}">`:'🏈'}</div>
+            <div class="league-info"><div class="league-name" title="${escapeHtml(l.name)}">${escapeHtml(l.name)}</div><div class="league-meta"><span class="league-badge badge-${ty}">${ty}</span>${se.map(s=>`<span class="league-badge badge-setting">${s}</span>`).join('')}</div></div>
+            <div class="league-actions"><button class="icon-btn" onclick="exportRoster('${escapeHtml(l.league_id)}')" title="${t('export')}" style="width:28px;height:28px;font-size:.8rem">📄</button></div>
             <div class="league-record">
                 <div class="record-labels"><span>${t('record')}</span>${winPct?`<span>Win%</span>`:''}${pf?`<span>PF</span>`:''}${avgAge?`<span>${t('avgAge')}</span>`:''}</div>
                 <div class="record-values"><span class="record-value">${rec}</span>${winPct?`<span class="record-label">${winPct}%</span>`:''}${pf?`<span class="record-label">${pf}</span>`:''}${avgAge?`<span class="record-label avg-age ${ageClass}">⌀ ${avgAge}</span>`:''}</div>
@@ -1423,7 +1437,19 @@ function getMostOwnedPlayers(){
 }
 
 function closeModal(e){if(e&&e.target!==e.currentTarget)return;document.getElementById('modalOverlay').classList.remove('active')}
-function copyModalContent(){navigator.clipboard.writeText(document.getElementById('modalContent').textContent);showToast(t('copied'))}
+function copyModalContent(){
+    const text=document.getElementById('modalContent').textContent;
+    if(navigator.clipboard&&window.isSecureContext){
+        navigator.clipboard.writeText(text).then(()=>showToast(t('copied'))).catch(()=>fallbackCopy(text));
+    }else{fallbackCopy(text)}
+}
+function fallbackCopy(text){
+    const ta=document.createElement('textarea');
+    ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');showToast(t('copied'))}catch(e){showToast('Erro ao copiar')}
+    document.body.removeChild(ta);
+}
 function showToast(m){const to=document.getElementById('toast');to.textContent=m;to.classList.add('show');setTimeout(()=>to.classList.remove('show'),2000)}
 
 init();
