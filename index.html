@@ -25,6 +25,13 @@
         .icon-btn.active{background:var(--accent);border-color:var(--accent);color:white}
         .icon-btn.danger{color:var(--error)}
         .icon-btn .badge{position:absolute;top:-4px;right:-4px;background:var(--error);color:white;font-size:.6rem;padding:2px 5px;border-radius:10px;font-weight:600}
+        
+        /* UX IMPROVEMENT: Focus States (A11y) */
+        .icon-btn:focus-visible, .filter-btn:focus-visible, .tool-chip:focus-visible, input:focus-visible, select:focus-visible, button:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
         .user-info{display:flex;align-items:center;gap:.5rem;background:var(--bg-secondary);padding:.4rem .75rem;border-radius:8px;border:1px solid var(--border);font-size:.85rem}
         .user-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent-muted)}
         .search-section{background:var(--bg-secondary);border-radius:12px;padding:3rem 2rem;margin-bottom:1.5rem;text-align:center;border:1px solid var(--border)}
@@ -205,7 +212,7 @@
         .leagues-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:.75rem}
         .leagues-grid.compact{display:flex;flex-direction:column;gap:.4rem}
         .leagues-grid.compact .league-card{display:grid;grid-template-columns:1fr auto;align-items:center}
-        .leagues-grid.compact .league-header{border-bottom:none; position: static;} /* Reset sticky for compact view */
+        .leagues-grid.compact .league-header{border-bottom:none; position: static;}
         .leagues-grid.compact .roster-section,.leagues-grid.compact .picks-section,.leagues-grid.compact .lineup-section{display:none}
         
         .league-card{background:var(--bg-secondary);border-radius:10px;overflow:hidden;border:1px solid var(--border);transition:all .2s; position: relative;}
@@ -408,11 +415,14 @@
     <div class="toast" id="toast">Copiado!</div>
     <script>
 const API='https://api.sleeper.app/v1';
-const CACHE_KEY='dynasty_cache';
-const USER_KEY='dynasty_user';
-const THEME_KEY='dynasty_theme';
-const LANG_KEY='dynasty_lang';
-const CACHE_HOURS=4;
+const CONFIG = {
+    CACHE_KEY: 'dynasty_cache',
+    USER_KEY: 'dynasty_user',
+    THEME_KEY: 'dynasty_theme',
+    LANG_KEY: 'dynasty_lang',
+    CACHE_HOURS: 4,
+    NFL_WEEKS: 18
+};
 
 // --- XSS PROTECTION ---
 function escapeHtml(text) {
@@ -500,7 +510,7 @@ const i18n = {
         history: 'Histórico',
         titles: 'Títulos',
         avgAge: 'Idade Média',
-        champion: 'Campeão',
+        champion: 'Campeón',
         runnerUp: 'Vice',
         thirdPlace: '3º Lugar',
         place: 'º Lugar',
@@ -725,8 +735,8 @@ const i18n = {
 
 let lang = 'pt-BR';
 function t(key) { return i18n[lang]?.[key] || i18n['en'][key] || key; }
-function setLang(l) { lang = l; localStorage.setItem(LANG_KEY, l); renderDash(); }
-function initLang() { const saved = localStorage.getItem(LANG_KEY); if (saved && i18n[saved]) lang = saved; }
+function setLang(l) { lang = l; localStorage.setItem(CONFIG.LANG_KEY, l); renderDash(); }
+function initLang() { const saved = localStorage.getItem(CONFIG.LANG_KEY); if (saved && i18n[saved]) lang = saved; }
 
 let players={},user=null,leagues=[],matchups={},transactions={},seasonHistory={};
 let filter='all',view='cards',year='2025',theme='dark',sortBy='name',playerSearch='',positionFilter='all';
@@ -783,25 +793,53 @@ function renderSkeletonScreen() {
         
 function normalizePosition(pos){if(!pos)return'?';if(['CB','S','FS','SS'].includes(pos))return'DB';if(['DE','DT','NT'].includes(pos))return'DL';if(['OLB','ILB','MLB'].includes(pos))return'LB';return pos;}
 
-// Cache functions
-function getCache(){try{const c=localStorage.getItem(CACHE_KEY);if(!c)return null;const d=JSON.parse(c);if(Date.now()-d.timestamp>CACHE_HOURS*60*60*1000)return null;return d}catch(e){return null}}
-function setCache(data){try{localStorage.setItem(CACHE_KEY,JSON.stringify({...data,timestamp:Date.now()}))}catch(e){}}
-function clearCache(){localStorage.removeItem(CACHE_KEY)}
+// Cache functions (SEC-001 Validation)
+function isValidCache(data) {
+    return data && 
+           typeof data.timestamp === 'number' && 
+           typeof data.userId === 'string' && 
+           Array.isArray(data.leagues);
+}
+
+function getCache(){
+    try{
+        const c = localStorage.getItem(CONFIG.CACHE_KEY);
+        if(!c) return null;
+        const d = JSON.parse(c);
+        
+        // Validação de segurança
+        if(!isValidCache(d)) {
+            console.warn('Cache inválido detectado. Limpando.');
+            clearCache();
+            return null;
+        }
+
+        if(Date.now() - d.timestamp > CONFIG.CACHE_HOURS*60*60*1000) return null;
+        return d;
+    } catch(e) {
+        return null;
+    }
+}
+function setCache(data){try{localStorage.setItem(CONFIG.CACHE_KEY,JSON.stringify({...data,timestamp:Date.now()}))}catch(e){}}
+function clearCache(){localStorage.removeItem(CONFIG.CACHE_KEY)}
 
 // Theme
-function initTheme(){const s=localStorage.getItem(THEME_KEY);if(s)theme=s;else if(window.matchMedia?.('(prefers-color-scheme:light)').matches)theme='light';document.documentElement.setAttribute('data-theme',theme)}
-function toggleTheme(){theme=theme==='dark'?'light':'dark';localStorage.setItem(THEME_KEY,theme);document.documentElement.setAttribute('data-theme',theme);renderDash()}
+function initTheme(){const s=localStorage.getItem(CONFIG.THEME_KEY);if(s)theme=s;else if(window.matchMedia?.('(prefers-color-scheme:light)').matches)theme='light';document.documentElement.setAttribute('data-theme',theme)}
+function toggleTheme(){theme=theme==='dark'?'light':'dark';localStorage.setItem(CONFIG.THEME_KEY,theme);document.documentElement.setAttribute('data-theme',theme);renderDash()}
 
 // Init
 async function init(){
     initTheme();
     initLang();
-    const s=localStorage.getItem(USER_KEY);
+    const s=localStorage.getItem(CONFIG.USER_KEY);
     if(s){
         try{
             user=JSON.parse(s);
+            // Validacao básica do user
+            if(!user || !user.user_id) throw new Error("Invalid User");
+
             const cache=getCache();
-            if(cache&&cache.userId===user.user_id){
+            if(cache && cache.userId === user.user_id){
                 players=cache.players||{};
                 leagues=cache.leagues||[];
                 year=cache.year||'2025';
@@ -809,7 +847,7 @@ async function init(){
                 return;
             }
             await loadLeagues();
-        }catch(e){localStorage.removeItem(USER_KEY);renderSearch()}
+        }catch(e){localStorage.removeItem(CONFIG.USER_KEY);renderSearch()}
     }else{renderSearch()}
 }
 
@@ -836,7 +874,7 @@ function renderSearch(){
     </div>
     
     <div class="footer">
-        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.6.0<br>
+        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.7.0<br>
         ${t('developedBy')} <strong>Lucio</strong>, ${t('codedBy')} <strong>Claude</strong> • <a href="https://x.com/luciocw" target="_blank" rel="noopener" class="twitter-link">𝕏 @luciocw</a><br>
         <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener" class="coffee-btn">☕ Buy me a coffee</a>
     </div>`;
@@ -855,7 +893,7 @@ async function handleSearch(){
         const r=await fetch(`${API}/user/${u}`);
         if(!r.ok)throw new Error(t('userNotFound'));
         user=await r.json();
-        if(document.getElementById('rememberMe')?.checked)localStorage.setItem(USER_KEY,JSON.stringify(user));
+        if(document.getElementById('rememberMe')?.checked)localStorage.setItem(CONFIG.USER_KEY,JSON.stringify(user));
         await loadLeagues();
     }catch(e){renderSearch();showErr(e.message)}
 }
@@ -929,23 +967,30 @@ async function loadMatchups(){
     renderDash();
 }
 
+// PERF-004: Otimização de Transações (Paralelismo)
 async function loadTransactions(leagueId){
-    if(transactions[leagueId])return;
-    try{
-        const all=[];
-        for(let w=1;w<=18;w++){
-            const r=await fetch(`${API}/league/${leagueId}/transactions/${w}`);
-            const tx=await r.json();
-            if(tx)all.push(...tx.filter(x=>x.type==='trade'));
-        }
-        transactions[leagueId]=all.sort((a,b)=>b.created-a.created);
-    }catch(e){transactions[leagueId]=[]}
+    if(transactions[leagueId]) return;
+    try {
+        // Dispara 18 requests simultâneos em vez de um por um
+        const requests = Array.from({length: CONFIG.NFL_WEEKS}, (_, i) => 
+            fetch(`${API}/league/${leagueId}/transactions/${i+1}`)
+                .then(r => r.json())
+                .catch(() => [])
+        );
+        
+        const results = await Promise.all(requests);
+        const all = results.flat().filter(x => x.type === 'trade');
+        
+        transactions[leagueId] = all.sort((a,b) => b.created - a.created);
+    } catch(e) {
+        transactions[leagueId] = [];
+    }
 }
 
 function getCurrentWeek(){const now=new Date();const seasonStart=new Date('2025-09-04');if(now<seasonStart)return 1;return Math.min(18,Math.ceil((now-seasonStart)/(7*24*60*60*1000)))}
 function showLoad(m){document.getElementById('app').innerHTML=`<header><h1>🏈 ${t('title')}</h1><button class="icon-btn" onclick="toggleTheme()">${theme==='dark'?'☀️':'🌙'}</button></header><div class="loading"><div class="spinner"></div><div>${m}</div></div>`}
 function showErr(m){const d=document.createElement('div');d.className='error-message';d.textContent=m;document.querySelector('.search-section')?.appendChild(d)}
-function logout(){localStorage.removeItem(USER_KEY);clearCache();user=null;leagues=[];renderSearch()}
+function logout(){localStorage.removeItem(CONFIG.USER_KEY);clearCache();user=null;leagues=[];renderSearch()}
 function getType(l){if(l.settings?.type===2)return'dynasty';if(l.settings?.type===1)return'keeper';return'redraft'}
 function getSettings(l){const s=[],sc=l.scoring_settings||{};if(sc.rec===1)s.push('PPR');else if(sc.rec===0.5)s.push('Half');else s.push('Std');if(sc.bonus_rec_te>0)s.push('TEP');const p=l.roster_positions||[];if(p.includes('SUPER_FLEX'))s.push('SF');if(p.some(x=>['DL','LB','DB','IDP_FLEX','DE','DT','CB','S'].includes(x)))s.push('IDP');s.push(`${l.total_rosters}T`);return s}
 function getFiltered(){let f=filter==='all'?leagues:leagues.filter(l=>getType(l)===filter);if(playerSearch){const q=playerSearch.toLowerCase();f=f.filter(l=>{const rp=l.myRoster?.players||[];return rp.some(id=>{const p=players[id];return p&&(p.full_name||'').toLowerCase().includes(q)})})}return sortLeagues(f)}
@@ -1460,7 +1505,7 @@ function renderDash(){
     <div class="leagues-grid ${view}">${ls.map(l=>renderCard(l)).join('')}</div>
     
     <div class="footer">
-        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • ${year} • v1.6.0<br>
+        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.7.0<br>
         ${t('developedBy')} <strong>Lucio</strong>, ${t('codedBy')} <strong>Claude</strong> • <a href="https://x.com/luciocw" target="_blank" rel="noopener" class="twitter-link">𝕏 @luciocw</a><br>
         <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener" class="coffee-btn">☕ Buy me a coffee</a>
     </div>`;
