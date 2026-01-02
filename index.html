@@ -1158,6 +1158,13 @@ async function loadSeasonHistory(){
 function calculateFinalPosition(myRoster,rosters,winners,losers){
     const rosterId=myRoster.roster_id;
     const totalTeams=rosters.length;
+    const wins=myRoster.settings?.wins||0;
+    const losses=myRoster.settings?.losses||0;
+
+    // --- CORREÇÃO AQUI: Se não houve jogos, retorna posição neutra ---
+    if((wins + losses) === 0){
+        return {position: totalTeams, label: 'Pre-Season', madePlayoffs: false};
+    }
     
     // Verificar apenas winners_bracket (playoffs do título)
     const inWinnersBracket=winners?.some(m=>m.t1===rosterId||m.t2===rosterId||m.w===rosterId||m.l===rosterId);
