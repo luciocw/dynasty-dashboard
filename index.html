@@ -780,7 +780,13 @@ function renderSearch(){
         </div>
         <label class="remember-me"><input type="checkbox" id="rememberMe" checked>${t('rememberMe')}</label>
     </div>
-    <div class="footer">${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.3.0</div>`;
+    
+    <div class="footer">
+        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.6.0<br>
+        ${t('developedBy')} <strong>Lucio</strong>, ${t('codedBy')} <strong>Claude</strong> • <a href="https://x.com/luciocw" target="_blank" rel="noopener" class="twitter-link">𝕏 @luciocw</a><br>
+        <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener" class="coffee-btn">☕ Buy me a coffee</a>
+    </div>`;
+    
     document.getElementById('usernameInput').addEventListener('keypress',e=>{if(e.key==='Enter')handleSearch()});
     document.getElementById('usernameInput').focus();
 }
