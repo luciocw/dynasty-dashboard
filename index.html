@@ -201,16 +201,32 @@
         .view-btn{padding:.35rem .6rem;background:transparent;border:none;color:var(--text-secondary);border-radius:4px;cursor:pointer;font-size:.75rem}
         .view-btn.active{background:var(--accent);color:white}
         
-        /* League Cards */
+        /* League Cards - WITH STICKY HEADER TWEAK */
         .leagues-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:.75rem}
         .leagues-grid.compact{display:flex;flex-direction:column;gap:.4rem}
         .leagues-grid.compact .league-card{display:grid;grid-template-columns:1fr auto;align-items:center}
-        .leagues-grid.compact .league-header{border-bottom:none}
+        .leagues-grid.compact .league-header{border-bottom:none; position: static;} /* Reset sticky for compact view */
         .leagues-grid.compact .roster-section,.leagues-grid.compact .picks-section,.leagues-grid.compact .lineup-section{display:none}
-        .league-card{background:var(--bg-secondary);border-radius:10px;overflow:hidden;border:1px solid var(--border);transition:all .2s}
+        
+        .league-card{background:var(--bg-secondary);border-radius:10px;overflow:hidden;border:1px solid var(--border);transition:all .2s; position: relative;}
         .league-card:hover{border-color:var(--accent)}
         .league-card.highlight{border-color:var(--success);box-shadow:0 0 0 2px var(--success-muted)}
-        .league-header{padding:.75rem;display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;border-bottom:1px solid var(--border)}
+        
+        /* STICKY HEADER IMPLEMENTATION */
+        .league-header{
+            padding:.75rem;
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:.5rem;
+            border-bottom:1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--bg-secondary);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
         .league-avatar{width:40px;height:40px;border-radius:8px;background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;overflow:hidden}
         .league-avatar img{width:100%;height:100%;object-fit:cover}
         .league-info{flex:1;min-width:0}
@@ -240,9 +256,13 @@
         .lineup-grid{display:flex;flex-wrap:wrap;gap:.2rem}
         .lineup-slot{font-size:.65rem;padding:.15rem .3rem;background:var(--bg-secondary);border-radius:4px}
         .slot-qb{color:var(--error)}.slot-rb{color:var(--success)}.slot-wr{color:var(--accent)}.slot-te{color:var(--warning)}.slot-flex{color:var(--dynasty)}.slot-sf{color:#ec4899}.slot-def{color:var(--text-secondary)}
+        
+        /* CUSTOM SCROLLBAR FOR ROSTERS */
         .roster-section{padding:.6rem;max-height:350px;overflow-y:auto}
-        .roster-section::-webkit-scrollbar{width:5px}
-        .roster-section::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+        .roster-section::-webkit-scrollbar{width:4px}
+        .roster-section::-webkit-scrollbar-track{background:transparent}
+        .roster-section::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+        
         .position-group{margin-bottom:.5rem}
         .position-header{display:flex;align-items:center;gap:.4rem;padding:.25rem .4rem;font-size:.65rem;font-weight:600;text-transform:uppercase;color:var(--text-secondary)}
         .position-count{background:var(--bg-card);padding:.1rem .3rem;border-radius:4px;font-size:.6rem}
@@ -308,13 +328,36 @@
         .modal-btn{flex:1;padding:.6rem;border-radius:8px;font-size:.85rem;cursor:pointer}
         .modal-btn.primary{background:var(--accent);color:white;border:none}
         .modal-btn.secondary{background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border)}
-        .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--success);color:white;padding:.6rem 1.2rem;border-radius:8px;font-size:.85rem;z-index:1001;opacity:0;transition:opacity .3s}
-        .toast.show{opacity:1}
+        
+        /* IMPROVED TOAST */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--success);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+
         .cache-info{font-size:.7rem;color:var(--text-secondary);margin-left:.5rem}
         .refresh-btn{font-size:.7rem;color:var(--accent);background:none;border:none;cursor:pointer;text-decoration:underline}
         
         @media(max-width:600px){.container{padding:1rem}.leagues-grid{grid-template-columns:1fr}.stats-bar{grid-template-columns:repeat(2,1fr)}.controls-row{flex-direction:column;align-items:stretch}.controls-right{justify-content:space-between}.matchups-grid{grid-template-columns:1fr}.compare-grid{grid-template-columns:1fr}}
-        /* --- SKELETON LOADING (Novo) --- */
+        
+        /* --- SKELETON LOADING --- */
         .skeleton-card {
             background: var(--bg-secondary);
             border-radius: 10px;
@@ -322,12 +365,11 @@
             padding: 0.75rem;
             position: relative;
             overflow: hidden;
-            height: 350px; /* Altura média de um card */
+            height: 350px;
             display: flex;
             flex-direction: column;
             gap: 1rem;
         }
-        /* Efeito de brilho animado */
         .skeleton-card::after {
             content: "";
             position: absolute;
@@ -344,7 +386,6 @@
         }
         @keyframes shimmer { 100% { transform: translateX(100%); } }
         
-        /* Blocos do esqueleto */
         .sk-header { display: flex; gap: 0.75rem; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem; }
         .sk-avatar { width: 40px; height: 40px; border-radius: 8px; background: var(--bg-card); }
         .sk-info { flex: 1; display: flex; flex-direction: column; gap: 0.4rem; }
@@ -372,6 +413,17 @@ const USER_KEY='dynasty_user';
 const THEME_KEY='dynasty_theme';
 const LANG_KEY='dynasty_lang';
 const CACHE_HOURS=4;
+
+// --- XSS PROTECTION ---
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 
 // Internationalization
 const i18n = {
@@ -681,6 +733,7 @@ let filter='all',view='cards',year='2025',theme='dark',sortBy='name',playerSearc
 let showPanel=null,selectedLeague=null,showCapitalDetails=false,compareLeagues=[null,null,null];
 const posOrder=['QB','RB','WR','TE','K','DEF','DL','LB','DB'];
 const byeWeeks={'ARI':14,'ATL':12,'BAL':14,'BUF':12,'CAR':7,'CHI':7,'CIN':8,'CLE':6,'DAL':7,'DEN':14,'DET':5,'GB':10,'HOU':14,'IND':14,'JAX':12,'KC':6,'LAC':5,'LAR':6,'LV':10,'MIA':6,'MIN':10,'NE':14,'NO':12,'NYG':11,'NYJ':12,'PHI':5,'PIT':9,'SEA':10,'SF':9,'TB':11,'TEN':5,'WAS':14};
+
 // --- LÓGICA DE ANOS DINÂMICA ---
 const START_YEAR = 2019; // Ano de corte (não busca antes disso)
 const CURR_YEAR_SYS = new Date().getFullYear();
@@ -690,6 +743,7 @@ const DYNAMIC_YEARS = Array.from(
     (_, i) => String((CURR_YEAR_SYS + 1) - i)
 );
 const HISTORY_YEARS = DYNAMIC_YEARS.slice(1); // Para histórico, ignoramos o ano futuro "vazio"
+
 // Função para gerar o HTML do Esqueleto
 function getSkeletonHtml() {
     // Gera 8 cards vazios com animação
@@ -769,7 +823,7 @@ function renderLangSelector(){
 
 function renderSearch(){
     document.getElementById('app').innerHTML=`
-    <header><h1>🏈 ${t('title')}</h1><div class="header-right">${renderLangSelector()}<button class="icon-btn" onclick="toggleTheme()">${theme==='dark'?'☀️':'🌙'}</button></div></header>
+    <header><h1>🏈 ${t('title')}</h1><div class="header-right">${renderLangSelector()}<button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle Theme">${theme==='dark'?'☀️':'🌙'}</button></div></header>
     <div class="search-section">
         <div class="search-logo">🏈</div>
         <div class="search-title">${t('title')}</div>
@@ -828,7 +882,6 @@ async function loadLeagues(forceRefresh=false,specificYear=null){
         }catch(e){}
     }else{
         // Caso B: Busca automática (Automação de Anos)
-        // Aqui ele usa a lista dinâmica que criamos no Passo 1
         for(const s of DYNAMIC_YEARS){
             try{
                 const r=await fetch(`${API}/user/${user.user_id}/leagues/nfl/${s}`);
@@ -1021,7 +1074,7 @@ function renderInjuryPanel(){
     const inj=getInjuredPlayers();
     if(!inj.length)return`<div class="panel show"><div class="panel-header"><div class="panel-title">🏥 ${t('injuryAlerts')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div><div style="color:var(--text-secondary);font-size:.8rem">${t('noInjuries')}</div></div>`;
     return`<div class="panel show"><div class="panel-header"><div class="panel-title">🏥 ${t('injuryAlerts')} <span style="color:var(--error)">(${inj.length})</span></div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
-    <div class="injury-list">${inj.map(p=>`<div class="injury-item ${p.injury_status.toLowerCase()}"><span class="player-pos pos-${normalizePosition(p.position).toLowerCase()}">${p.position}</span><span class="injury-player">${p.full_name}</span><span class="injury-status ${p.injury_status.toLowerCase()}">${p.injury_status}</span><span class="injury-league">${p.leagueName}</span></div>`).join('')}</div></div>`;
+    <div class="injury-list">${inj.map(p=>`<div class="injury-item ${p.injury_status.toLowerCase()}"><span class="player-pos pos-${normalizePosition(p.position).toLowerCase()}">${p.position}</span><span class="injury-player">${escapeHtml(p.full_name)}</span><span class="injury-status ${p.injury_status.toLowerCase()}">${p.injury_status}</span><span class="injury-league">${escapeHtml(p.leagueName)}</span></div>`).join('')}</div></div>`;
 }
 
 function renderMatchupsPanel(){
@@ -1030,11 +1083,11 @@ function renderMatchupsPanel(){
     const wins=ms.filter(m=>m.myScore>m.oppScore).length;
     const losses=ms.filter(m=>m.myScore<m.oppScore).length;
     return`<div class="panel show"><div class="panel-header"><div class="panel-title">🏈 ${t('matchups')} ${t('week')} ${getCurrentWeek()} <span style="color:var(--success)">${wins}W</span>-<span style="color:var(--error)">${losses}L</span></div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
-    <div class="matchups-grid">${ms.map(m=>{const status=m.myScore>m.oppScore?'winning':m.myScore<m.oppScore?'losing':'tie';return`<div class="matchup-card ${status}"><div class="matchup-league">${m.league}</div><div class="matchup-teams"><div class="matchup-team"><div class="matchup-name">${t('you')}</div><div class="matchup-score ${status==='winning'?'winning':''}">${m.myScore.toFixed(1)}</div></div><div class="matchup-vs">vs</div><div class="matchup-team"><div class="matchup-name">${m.oppName}</div><div class="matchup-score ${status==='losing'?'losing':''}">${m.oppScore.toFixed(1)}</div></div></div></div>`}).join('')}</div></div>`;
+    <div class="matchups-grid">${ms.map(m=>{const status=m.myScore>m.oppScore?'winning':m.myScore<m.oppScore?'losing':'tie';return`<div class="matchup-card ${status}"><div class="matchup-league">${escapeHtml(m.league)}</div><div class="matchup-teams"><div class="matchup-team"><div class="matchup-name">${t('you')}</div><div class="matchup-score ${status==='winning'?'winning':''}">${m.myScore.toFixed(1)}</div></div><div class="matchup-vs">vs</div><div class="matchup-team"><div class="matchup-name">${escapeHtml(m.oppName)}</div><div class="matchup-score ${status==='losing'?'losing':''}">${m.oppScore.toFixed(1)}</div></div></div></div>`}).join('')}</div></div>`;
 }
 
 function renderTradesPanel(){
-    const opts=leagues.map(l=>`<option value="${l.league_id}" ${selectedLeague===l.league_id?'selected':''}>${l.name}</option>`).join('');
+    const opts=leagues.map(l=>`<option value="${l.league_id}" ${selectedLeague===l.league_id?'selected':''}>${escapeHtml(l.name)}</option>`).join('');
     let content=`<div style="color:var(--text-secondary);font-size:.8rem">${t('selectLeague')}</div>`;
     if(selectedLeague){
         const ts=getMyTrades(selectedLeague);
@@ -1049,9 +1102,9 @@ function renderTradesPanel(){
                 const draftAdds=(tr.draft_picks||[]).filter(p=>p.owner_id===myRosterId&&p.previous_owner_id!==myRosterId);
                 const draftDrops=(tr.draft_picks||[]).filter(p=>p.previous_owner_id===myRosterId&&p.owner_id!==myRosterId);
                 return`<div class="trade-item"><div class="trade-header"><span>${date}</span><span>${t('week')} ${tr.leg||'?'}</span></div>
-                <div class="trade-content"><div class="trade-side"><div class="trade-side-label">${t('received')}</div>${myAdds.map(id=>`<div class="trade-asset"><span class="trade-asset-type">🏃</span>${players[id]?.full_name||id}</div>`).join('')}${draftAdds.map(p=>`<div class="trade-asset"><span class="trade-asset-type">📋</span>'${String(p.season).slice(-2)} R${p.round}</div>`).join('')}</div>
+                <div class="trade-content"><div class="trade-side"><div class="trade-side-label">${t('received')}</div>${myAdds.map(id=>`<div class="trade-asset"><span class="trade-asset-type">🏃</span>${escapeHtml(players[id]?.full_name||id)}</div>`).join('')}${draftAdds.map(p=>`<div class="trade-asset"><span class="trade-asset-type">📋</span>'${String(p.season).slice(-2)} R${p.round}</div>`).join('')}</div>
                 <div class="trade-arrow">⇄</div>
-                <div class="trade-side"><div class="trade-side-label">${t('sent')}</div>${myDrops.map(id=>`<div class="trade-asset"><span class="trade-asset-type">🏃</span>${players[id]?.full_name||id}</div>`).join('')}${draftDrops.map(p=>`<div class="trade-asset"><span class="trade-asset-type">📋</span>'${String(p.season).slice(-2)} R${p.round}</div>`).join('')}</div></div></div>`}).join('')}</div>`;
+                <div class="trade-side"><div class="trade-side-label">${t('sent')}</div>${myDrops.map(id=>`<div class="trade-asset"><span class="trade-asset-type">🏃</span>${escapeHtml(players[id]?.full_name||id)}</div>`).join('')}${draftDrops.map(p=>`<div class="trade-asset"><span class="trade-asset-type">📋</span>'${String(p.season).slice(-2)} R${p.round}</div>`).join('')}</div></div></div>`}).join('')}</div>`;
         }else content=`<div style="color:var(--text-secondary);font-size:.8rem">${t('noTrades')}</div>`;
     }
     return`<div class="panel show"><div class="panel-header"><div class="panel-title">🔄 ${t('tradeHistory')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
@@ -1093,14 +1146,14 @@ function renderStandingsPanel(){
         if(isExpanded){
             expandedHtml=`<div class="standings-expanded"><div class="rankings-list">${s.ranks.map((r,i)=>{
                 const rPosClass=i<3?'top3':i>=s.total-3?'bottom3':'mid';
-                return`<div class="ranking-item compact"><span class="ranking-pos ${rPosClass}">${i+1}</span><span class="ranking-team ${r.isMe?'me':''}">${r.name}${r.isMe?youLabel:''}</span><div class="ranking-stats"><span>${r.wins}-${r.losses}</span><span>${r.winPct.toFixed(0)}%</span><span>${r.pf.toFixed(0)}pf</span></div></div>`}).join('')}</div></div>`;
+                return`<div class="ranking-item compact"><span class="ranking-pos ${rPosClass}">${i+1}</span><span class="ranking-team ${r.isMe?'me':''}">${escapeHtml(r.name)}${r.isMe?youLabel:''}</span><div class="ranking-stats"><span>${r.wins}-${r.losses}</span><span>${r.winPct.toFixed(0)}%</span><span>${r.pf.toFixed(0)}pf</span></div></div>`}).join('')}</div></div>`;
         }
         
         return`<div class="standing-item ${isExpanded?'expanded':''}">
             <div class="standing-header" onclick="toggleStandingExpand('${s.leagueId}')">
                 <span class="standing-expand">${expandIcon}</span>
                 <span class="ranking-pos ${posClass}">${s.position}°</span>
-                <span class="standing-name">${s.name}</span>
+                <span class="standing-name">${escapeHtml(s.name)}</span>
                 <div class="standing-stats">
                     <span>${s.wins}-${s.losses}</span>
                     <span>${s.winPct.toFixed(0)}%</span>
@@ -1243,7 +1296,7 @@ function renderHistoryPanel(){
                 const icon=d.position===1?'🏆':d.position===2?'🥈':d.position===3?'🥉':d.madePlayoffs?'✓':'';
                 return`<div class="history-item ${posClass}">
                     <span class="history-pos">${icon||d.position+'°'}</span>
-                    <span class="history-league">${d.leagueName}</span>
+                    <span class="history-league">${escapeHtml(d.leagueName)}</span>
                     <span class="history-record">${d.wins}-${d.losses}</span>
                     <span class="history-label">${d.positionLabel}</span>
                 </div>`;
@@ -1256,7 +1309,7 @@ function renderHistoryPanel(){
 }
 
 function renderByePanel(){
-    const opts=leagues.map(l=>`<option value="${l.league_id}" ${selectedLeague===l.league_id?'selected':''}>${l.name}</option>`).join('');
+    const opts=leagues.map(l=>`<option value="${l.league_id}" ${selectedLeague===l.league_id?'selected':''}>${escapeHtml(l.name)}</option>`).join('');
     let content='';
     const weekLabel=lang==='en'?'Wk':lang==='es'?'Sem':'Sem';
     if(selectedLeague){
@@ -1271,19 +1324,19 @@ function showByePlayers(lid,week){
     const bd=getByeData(lid);const ps=bd[week]||[];
     const el=document.getElementById('byePlayers');if(!el)return;
     const none=lang==='en'?'None':lang==='es'?'Ninguno':'Nenhum';
-    el.innerHTML=`<div style="font-size:.75rem;color:var(--text-secondary);margin-bottom:.5rem">${t('week')} ${week}</div>${ps.map(p=>`<div class="player-row"><span class="player-pos pos-${normalizePosition(p.pos).toLowerCase()}">${p.pos}</span><span class="player-name">${p.name}</span><span class="player-team">${p.team}</span></div>`).join('')||`<div style="font-size:.8rem;color:var(--text-secondary)">${none}</div>`}`;
+    el.innerHTML=`<div style="font-size:.75rem;color:var(--text-secondary);margin-bottom:.5rem">${t('week')} ${week}</div>${ps.map(p=>`<div class="player-row"><span class="player-pos pos-${normalizePosition(p.pos).toLowerCase()}">${p.pos}</span><span class="player-name">${escapeHtml(p.name)}</span><span class="player-team">${p.team}</span></div>`).join('')||`<div style="font-size:.8rem;color:var(--text-secondary)">${none}</div>`}`;
 }
 
 function renderComparePanel(){
-    const opts=leagues.map(l=>`<option value="${l.league_id}">${l.name}</option>`).join('');
+    const opts=leagues.map(l=>`<option value="${l.league_id}">${escapeHtml(l.name)}</option>`).join('');
     const leagueLabel=lang==='en'?'League':lang==='es'?'Liga':'Liga';
     const cols=compareLeagues.filter(id=>id).map(id=>{
         const l=leagues.find(x=>x.league_id===id);if(!l)return'';
         const byPos={};(l.myRoster?.players||[]).forEach(pid=>{const p=players[pid];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push(p)}});
-        return`<div class="compare-column"><div class="compare-column-title">${l.name}</div>${posOrder.filter(pos=>byPos[pos]).map(pos=>`<div class="compare-pos-group"><div class="compare-pos-header">${pos} (${byPos[pos].length})</div>${byPos[pos].slice(0,8).map(p=>`<div class="compare-player">${p.full_name} <span style="color:var(--text-secondary);font-size:.65rem">${p.team||'FA'}</span></div>`).join('')}</div>`).join('')}</div>`;
+        return`<div class="compare-column"><div class="compare-column-title">${escapeHtml(l.name)}</div>${posOrder.filter(pos=>byPos[pos]).map(pos=>`<div class="compare-pos-group"><div class="compare-pos-header">${pos} (${byPos[pos].length})</div>${byPos[pos].slice(0,8).map(p=>`<div class="compare-player">${escapeHtml(p.full_name)} <span style="color:var(--text-secondary);font-size:.65rem">${p.team||'FA'}</span></div>`).join('')}</div>`).join('')}</div>`;
     }).join('');
     return`<div class="panel show"><div class="panel-header"><div class="panel-title">⚖️ ${t('compareRosters')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
-    <div class="compare-selector">${[0,1,2].map(i=>`<select class="mini-select" onchange="setCompareLeague(${i},this.value)"><option value="">${leagueLabel} ${i+1}</option>${leagues.map(l=>`<option value="${l.league_id}" ${compareLeagues[i]===l.league_id?'selected':''}>${l.name}</option>`).join('')}</select>`).join('')}</div>
+    <div class="compare-selector">${[0,1,2].map(i=>`<select class="mini-select" onchange="setCompareLeague(${i},this.value)"><option value="">${leagueLabel} ${i+1}</option>${leagues.map(l=>`<option value="${l.league_id}" ${compareLeagues[i]===l.league_id?'selected':''}>${escapeHtml(l.name)}</option>`).join('')}</select>`).join('')}</div>
     <div class="compare-grid">${cols}</div></div>`;
 }
 function setCompareLeague(i,v){compareLeagues[i]=v||null;renderDash()}
@@ -1292,13 +1345,13 @@ function renderCapitalPanel(){
     const cap=getDraftCapital();const years=Object.keys(cap.byYear).sort();
     return`<div class="panel show"><div class="panel-header"><div class="panel-title">📊 ${t('draftCapital')}</div><button class="capital-toggle" style="background:none;border:none;color:var(--accent);font-size:.75rem;cursor:pointer" onclick="showCapitalDetails=!showCapitalDetails;renderDash()">${showCapitalDetails?'▲':'▼'}</button><button class="panel-close" onclick="togglePanel(null)">×</button></div>
     <div class="capital-summary">${years.map(y=>{const yr=cap.byYear[y];const det=[];for(let r=1;r<=5;r++)if(yr[`r${r}`])det.push(`${yr[`r${r}`]}×R${r}`);return`<div class="capital-year"><div class="capital-year-label">${y}</div><div class="capital-year-value">${yr.total}</div><div class="capital-year-detail">${det.slice(0,3).join(' ')}</div></div>`}).join('')}<div class="capital-year"><div class="capital-year-label">${t('total')}</div><div class="capital-year-value">${cap.total}</div><div class="capital-year-detail">~${cap.avg}${t('perLeague')}</div></div></div>
-    <div class="capital-leagues ${showCapitalDetails?'show':''}">${Object.entries(cap.byLeague).sort((a,b)=>b[1].count-a[1].count).map(([id,d])=>`<div class="capital-league-row"><span>${d.name}</span><span class="capital-status ${d.status}">${d.count} (${d.diff>=0?'+':''}${d.diff.toFixed(0)})</span></div>`).join('')}</div></div>`;
+    <div class="capital-leagues ${showCapitalDetails?'show':''}">${Object.entries(cap.byLeague).sort((a,b)=>b[1].count-a[1].count).map(([id,d])=>`<div class="capital-league-row"><span>${escapeHtml(d.name)}</span><span class="capital-status ${d.status}">${d.count} (${d.diff>=0?'+':''}${d.diff.toFixed(0)})</span></div>`).join('')}</div></div>`;
 }
 
 function renderExposurePanel(){
     const exp=getExposure();
     const most=getMostOwnedPlayers();
-    const mostHtml=most.length?`<div class="panel-section"><div class="panel-subtitle">⭐ ${t('mostOwned')}</div><div class="most-owned-list">${most.map((p,i)=>`<div class="most-owned-item"><span class="most-owned-rank">${i+1}</span><span class="player-pos pos-${normalizePosition(p.player?.position).toLowerCase()}">${p.player?.position||'?'}</span><span class="most-owned-name">${p.player?.full_name||'Unknown'}</span><span class="most-owned-team">${p.player?.team||'FA'}</span><span class="most-owned-count">${p.count}x</span></div>`).join('')}</div></div>`:'';
+    const mostHtml=most.length?`<div class="panel-section"><div class="panel-subtitle">⭐ ${t('mostOwned')}</div><div class="most-owned-list">${most.map((p,i)=>`<div class="most-owned-item"><span class="most-owned-rank">${i+1}</span><span class="player-pos pos-${normalizePosition(p.player?.position).toLowerCase()}">${p.player?.position||'?'}</span><span class="most-owned-name">${escapeHtml(p.player?.full_name||'Unknown')}</span><span class="most-owned-team">${p.player?.team||'FA'}</span><span class="most-owned-count">${p.count}x</span></div>`).join('')}</div></div>`:'';
     return`<div class="panel show"><div class="panel-header"><div class="panel-title">📈 ${t('exposure')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div>
     <div class="panel-section"><div class="panel-subtitle">${t('byPosition')}</div><div class="exposure-grid">${posOrder.filter(p=>exp[p]).map(p=>`<div class="exposure-item"><span class="exposure-pos">${p}</span><span>${exp[p]}</span></div>`).join('')}</div></div>${mostHtml}</div>`;
 }
@@ -1332,10 +1385,10 @@ function renderDash(){
         <h1>🏈 ${t('title')}</h1>
         <div class="header-right">
             ${renderLangSelector()}
-            <button class="icon-btn" onclick="toggleTheme()" title="Theme">${theme==='dark'?'☀️':'🌙'}</button>
-            <button class="icon-btn ${inj.length?'danger':''}" onclick="togglePanel('injury')" title="${t('injuries')}" style="position:relative">🏥${inj.length?`<span class="badge">${inj.length}</span>`:''}</button>
-            <div class="user-info">${user.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${user.avatar}" class="user-avatar">`:''}${user.display_name||user.username}</div>
-            <button class="icon-btn" onclick="logout()" title="${t('logout')}">🚪</button>
+            <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle Theme">${theme==='dark'?'☀️':'🌙'}</button>
+            <button class="icon-btn ${inj.length?'danger':''}" onclick="togglePanel('injury')" aria-label="${t('injuries')}" style="position:relative">🏥${inj.length?`<span class="badge">${inj.length}</span>`:''}</button>
+            <div class="user-info">${user.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${user.avatar}" class="user-avatar" loading="lazy">`:''}${escapeHtml(user.display_name||user.username)}</div>
+            <button class="icon-btn" onclick="logout()" aria-label="${t('logout')}">🚪</button>
         </div>
     </header>
     
@@ -1370,7 +1423,7 @@ function renderDash(){
             <span class="cache-info">${t('cache')}: ${cacheTime} <button class="refresh-btn" onclick="loadLeagues(true)">↻</button></span>
             <div class="player-search-wrap">
                 <input type="text" class="player-search" id="ps" placeholder="${t('search')}" value="${playerSearch}" onkeypress="if(event.key==='Enter'){playerSearch=this.value;renderDash()}">
-                <button class="search-go" onclick="playerSearch=document.getElementById('ps').value;renderDash()">🔍</button>
+                <button class="search-go" onclick="playerSearch=document.getElementById('ps').value;renderDash()" aria-label="${t('search')}">🔍</button>
             </div>
             ${playerSearch?`<button class="icon-btn" onclick="playerSearch='';renderDash()" style="width:auto;padding:0 .5rem;font-size:.75rem">✕</button>`:''}
             <select class="mini-select" onchange="sortBy=this.value;renderDash()">
@@ -1421,7 +1474,6 @@ function renderCard(l){
     const ty=getType(l),se=getSettings(l),ro=l.myRoster;
     const wins=ro?.settings?.wins||0,losses=ro?.settings?.losses||0;
     const rec=ro?.settings?`${wins}-${losses}`:'--';
-    // Mantemos o calculo caso precise no futuro, mas nao usamos no HTML abaixo
     const totalGames=wins+losses;
     const winPct=totalGames>0?((wins/totalGames)*100).toFixed(1):null; 
     const pf=ro?.settings?.fpts?(ro.settings.fpts+(ro.settings.fpts_decimal||0)/100).toFixed(1):null;
@@ -1429,12 +1481,10 @@ function renderCard(l){
     const avgAge=getAvgAge(ro);
     const byPos={},rp=ro?.players||[],taxi=ro?.taxi||[],ir=ro?.reserve||[];
     
-    // Contagem por status
     const activeCount=rp.filter(id=>!taxi.includes(id)&&!ir.includes(id)).length;
     const irCount=ir.length;
     const taxiCount=taxi.length;
     
-    // Roster completo check
     const rosterSlots=(l.roster_positions||[]).filter(p=>p!=='BN').length;
     const benchSlots=(l.roster_positions||[]).filter(p=>p==='BN').length;
     const totalSlots=rosterSlots+benchSlots;
@@ -1442,11 +1492,9 @@ function renderCard(l){
     const rosterIcon=rosterFull?'✅':'⚠️';
     const rosterTip=rosterFull?t('rosterComplete'):`${totalSlots-activeCount} ${t('openSlots')}`;
     
-    // Bye week atual
     const currentWeek=getCurrentWeek();
     const playersOnBye=rp.filter(id=>{const p=players[id];return p?.team&&byeWeeks[p.team]===currentWeek}).length;
     
-    // Idade média classificação
     const ageClass=avgAge?(parseFloat(avgAge)<25?'young':parseFloat(avgAge)>27?'old':'mid'):'';
     
     rp.forEach(id=>{const p=players[id];if(p){const pos=normalizePosition(p.position);if(!byPos[pos])byPos[pos]=[];byPos[pos].push({...p,id,displayPos:p.position,status:ir.includes(id)?'IR':taxi.includes(id)?'TAXI':null,onBye:p.team&&byeWeeks[p.team]===currentWeek})}});
@@ -1454,26 +1502,23 @@ function renderCard(l){
     const sorted=Object.keys(byPos).sort((a,b)=>posOrder.indexOf(a)-posOrder.indexOf(b));
     const hasSearched=playerSearch&&rp.some(id=>{const p=players[id];return p&&(p.full_name||'').toLowerCase().includes(playerSearch.toLowerCase())});
     
-    // Filtro por posição
     const posFiltered=positionFilter==='all'||sorted.includes(positionFilter);
     if(positionFilter!=='all'&&!sorted.includes(positionFilter))return'';
     
     const lineup=getLineup(l);
     const lineupHtml=lineup.length?`<div class="lineup-section"><div class="lineup-title">${t('lineup')}</div><div class="lineup-grid">${lineup.map(s=>{const cls=s.pos==='QB'?'qb':s.pos==='RB'?'rb':s.pos==='WR'?'wr':s.pos==='TE'?'te':['FLEX','REC_FLEX'].includes(s.pos)?'flex':s.pos==='SUPER_FLEX'?'sf':'def';return`<span class="lineup-slot slot-${cls}">${s.label}</span>`}).join('')}</div></div>`:'';
     
-    // Roster stats line
     const rosterStats=`<div class="roster-stats"><span title="${rosterTip}">${rosterIcon}</span><span>${activeCount}</span>${irCount?`<span class="rs-ir">${irCount} IR</span>`:''}${taxiCount?`<span class="rs-taxi">${taxiCount} TAXI</span>`:''}${playersOnBye?`<span class="rs-bye">${playersOnBye} BYE</span>`:''}</div>`;
     
     let picks='';if(ty==='dynasty'){const mp=getPicks(l);if(mp.length)picks=`<div class="picks-section"><div class="picks-title">${t('draftPicks')}</div><div class="picks-grid">${mp.map(p=>`<span class="pick-badge ${p.own?'own':'extra'}" title="${p.note||''}">${p.label}</span>`).join('')}</div></div>`}
     
     const filteredPos=positionFilter==='all'?sorted:sorted.filter(p=>p===positionFilter);
     
-    // --- ALTERAÇÃO AQUI: Cabeçalho limpo (Sem Win% e PF) ---
     return`<div class="league-card${hasSearched?' highlight':''}">
         <div class="league-header">
-            <div class="league-avatar">${l.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${l.avatar}">`:'🏈'}</div>
+            <div class="league-avatar">${l.avatar?`<img src="https://sleepercdn.com/avatars/thumbs/${l.avatar}" loading="lazy">`:'🏈'}</div>
             <div class="league-info" style="min-width: 0; flex: 1; padding-right: 5px;">
-                <div class="league-name" title="${l.name}">${l.name}</div>
+                <div class="league-name" title="${escapeHtml(l.name)}">${escapeHtml(l.name)}</div>
                 <div class="league-meta"><span class="league-badge badge-${ty}">${ty}</span>${se.map(s=>`<span class="league-badge badge-setting">${s}</span>`).join('')}</div>
             </div>
             <div class="league-actions"><button class="icon-btn" onclick="exportRoster('${l.league_id}')" title="${t('export')}" style="width:28px;height:28px;font-size:.8rem">📄</button></div>
@@ -1488,14 +1533,14 @@ function renderCard(l){
             const isSearched=playerSearch&&(p.full_name||'').toLowerCase().includes(playerSearch.toLowerCase());
             const isInj=p.injury_status&&['Out','Doubtful','Questionable','IR'].includes(p.injury_status);
             const age=getAge(p);
-            return`<div class="player-row${isSearched?' searched':''}${isInj?' injured':''}${p.onBye?' on-bye':''}"><span class="player-pos pos-${pos.toLowerCase()}">${p.displayPos||pos}</span><span class="player-name">${p.full_name||p.first_name+' '+p.last_name}</span><span class="player-team">${p.team||'FA'}</span>${age?`<span class="player-age">${age}</span>`:''}${p.onBye?`<span class="player-status status-bye">BYE</span>`:''}${isInj?`<span class="player-status status-inj">${p.injury_status}</span>`:''}${p.status?`<span class="player-status status-${p.status.toLowerCase()}">${p.status}</span>`:''}</div>`}).join('')}</div></div>`).join('')}</div>
+            return`<div class="player-row${isSearched?' searched':''}${isInj?' injured':''}${p.onBye?' on-bye':''}"><span class="player-pos pos-${pos.toLowerCase()}">${p.displayPos||pos}</span><span class="player-name">${escapeHtml(p.full_name||p.first_name+' '+p.last_name)}</span><span class="player-team">${p.team||'FA'}</span>${age?`<span class="player-age">${age}</span>`:''}${p.onBye?`<span class="player-status status-bye">BYE</span>`:''}${isInj?`<span class="player-status status-inj">${p.injury_status}</span>`:''}${p.status?`<span class="player-status status-${p.status.toLowerCase()}">${p.status}</span>`:''}</div>`}).join('')}</div></div>`).join('')}</div>
         ${picks}
     </div>`;
 }
 
 function getPicks(l){const picks=[],tp=l.tradedPicks||[],rid=l.myRoster?.roster_id;if(!rid)return picks;const cs=parseInt(l.season);const maxR=l.settings?.draft_rounds||4;for(let y=cs+1;y<=cs+3;y++){for(let r=1;r<=maxR;r++){const traded=tp.find(t=>t.season===String(y)&&t.round===r&&t.roster_id===rid&&t.owner_id!==rid);if(!traded)picks.push({label:`'${String(y).slice(-2)} R${r}`,own:true,note:t('own')});const acq=tp.filter(t=>t.season===String(y)&&t.round===r&&t.owner_id===rid&&t.roster_id!==rid);acq.forEach(tx=>{const oo=l.rosters?.find(x=>x.roster_id===tx.roster_id),ou=l.users?.find(u=>u.user_id===oo?.owner_id);picks.push({label:`'${String(y).slice(-2)} R${r}`,own:false,note:ou?.display_name||t('acquired')})})}}return picks.sort((a,b)=>{const[ay,ar]=a.label.match(/\d+/g),[by,br]=b.label.match(/\d+/g);return ay-by||ar-br})}
 
-function exportRoster(lid){const l=leagues.find(x=>x.league_id===lid);if(!l)return;document.getElementById('modalTitle').textContent=`${l.name}`;document.getElementById('modalContent').textContent=generateMarkdown(l);document.getElementById('modalOverlay').classList.add('active');document.getElementById('modalClose').textContent=t('close');document.getElementById('modalCopy').textContent=t('copy')}
+function exportRoster(lid){const l=leagues.find(x=>x.league_id===lid);if(!l)return;document.getElementById('modalTitle').textContent=`${escapeHtml(l.name)}`;document.getElementById('modalContent').textContent=generateMarkdown(l);document.getElementById('modalOverlay').classList.add('active');document.getElementById('modalClose').textContent=t('close');document.getElementById('modalCopy').textContent=t('copy')}
 
 function generateMarkdown(l){
     const ty=getType(l),se=getSettings(l),ro=l.myRoster;
