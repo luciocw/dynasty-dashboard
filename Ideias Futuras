@@ -1,0 +1,98 @@
+📁 Documento de Estratégia: Dynasty Dashboard (Roadmap & Monetização)
+Status Atual: MVP (v1.6.0) Finalizado. Modelo Atual: Gratuito / Client-Side (Sem servidor).
+
+🎯 Fase 1: Validação & Crescimento (Atual)
+Objetivo: Ganhar usuários e validar se a ferramenta é útil.
+
+Estratégia de Distribuição:
+
+Divulgar em comunidades de Fantasy Football (Twitter/X, Reddit r/DynastyFF, Grupos de WhatsApp/Telegram).
+
+Focar no diferencial: "Veja todas as suas ligas em uma tela só, sem login e senha, direto no navegador".
+
+Modelo de Receita:
+
+Donationware: Botão "Buy me a Coffee" (já implementado).
+
+Feedback Loop: Criar um canal (e-mail ou DM no X) para ouvir o que os usuários sentem falta.
+
+🚀 Fase 2: Funcionalidades Premium (Ideias para Monetização)
+Objetivo: Criar valor "Power User" que justifique pagamento.
+
+1. Cross-League Trade Finder (Buscador de Trocas)
+A Dor: O usuário quer comprar o jogador "X", mas não sabe em quais das suas 20 ligas o dono desse jogador estaria disposto a vender.
+
+A Solução:
+
+Usuário digita "CeeDee Lamb".
+
+Sistema varre todas as ligas e lista:
+
+Quem tem o jogador.
+
+Situação do time (Rebuilding vs Contender).
+
+Se o time tem necessidades que o usuário pode suprir.
+
+2. Assistente de Waiver Wire (Varredura de Livres)
+A Dor: Perder jogadores bons que estão livres em apenas uma das ligas porque esqueceu de checar.
+
+A Solução:
+
+Relatório unificado: "Jogadores com +40% de posse geral que estão LIVRES (Free Agent) nas suas ligas".
+
+Alerta de "Snipe": Encontrar jogadores valiosos esquecidos no waiver.
+
+3. Calculadora de Valor Integrada (API KTC/FantasyCalc)
+A Dor: Ter que abrir outro site para conferir se a troca é justa.
+
+A Solução:
+
+Integração com APIs de KeepTradeCut ou FantasyCalc.
+
+Ao passar o mouse sobre um jogador, mostrar o "Valor de Mercado" atual.
+
+Simulador de troca dentro do próprio Dashboard.
+
+4. Exportação Profissional (CSV/Excel)
+A Dor: Usuários avançados querem manipular dados em planilhas próprias.
+
+A Solução:
+
+Gerar um .csv estruturado com todos os jogadores, IDs, idades, contratos e picks de todas as ligas de uma vez.
+
+🛠️ Fase 3: Evolução Técnica (Necessária para Cobrança)
+Para cobrar mensalidade ou venda única, a arquitetura precisará mudar.
+
+Autenticação Real:
+
+Criar sistema de Login (E-mail/Senha ou Login via Google/Sleeper OAuth).
+
+Banco de Dados (Firebase, Supabase ou PostgreSQL) para salvar as preferências do usuário.
+
+Sistema de Pagamentos:
+
+Integração com Stripe (Internacional) ou Mercado Pago (Brasil).
+
+Controle de acesso (Flag is_premium = true no banco de dados).
+
+Backend:
+
+Mover a lógica pesada para um servidor (Node.js/Python) para proteger o código-fonte das funcionalidades Premium.
+
+💡 Ideias de Modelos de Negócio
+Freemium (Recomendado):
+
+Visualização básica (o que tem hoje) é grátis.
+
+Ferramentas de análise (Trade Finder, Waiver) custam R$ 9,90/mês ou R$ 89,90/ano.
+
+Lifetime Deal (Acesso Vitalício):
+
+Pague uma vez (ex: R$ 50,00) e tenha acesso a tudo para sempre. Ótimo para levantar caixa inicial.
+
+Paywall por Feature:
+
+O uso básico é grátis. Quer exportar para Excel? Custa R$ 5,00 por exportação (Microtransação).
+
+Próximo Passo Sugerido: Focar na divulgação do MVP. Se você conseguir 100 usuários ativos recorrentes, você já validou que existe demanda para começar a construir a Fase 2.
