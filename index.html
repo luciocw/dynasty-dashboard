@@ -681,7 +681,15 @@ let filter='all',view='cards',year='2025',theme='dark',sortBy='name',playerSearc
 let showPanel=null,selectedLeague=null,showCapitalDetails=false,compareLeagues=[null,null,null];
 const posOrder=['QB','RB','WR','TE','K','DEF','DL','LB','DB'];
 const byeWeeks={'ARI':14,'ATL':12,'BAL':14,'BUF':12,'CAR':7,'CHI':7,'CIN':8,'CLE':6,'DAL':7,'DEN':14,'DET':5,'GB':10,'HOU':14,'IND':14,'JAX':12,'KC':6,'LAC':5,'LAR':6,'LV':10,'MIA':6,'MIN':10,'NE':14,'NO':12,'NYG':11,'NYJ':12,'PHI':5,'PIT':9,'SEA':10,'SF':9,'TB':11,'TEN':5,'WAS':14};
-const HISTORY_YEARS=['2025','2024','2023','2022','2021','2020'];
+// --- LÓGICA DE ANOS DINÂMICA ---
+const START_YEAR = 2019; // Ano de corte (não busca antes disso)
+const CURR_YEAR_SYS = new Date().getFullYear();
+// Gera lista do próximo ano até 2019 (Ex: 2027, 2026, 2025... 2019)
+const DYNAMIC_YEARS = Array.from(
+    {length: (CURR_YEAR_SYS + 1) - START_YEAR + 1}, 
+    (_, i) => String((CURR_YEAR_SYS + 1) - i)
+);
+const HISTORY_YEARS = DYNAMIC_YEARS.slice(1); // Para histórico, ignoramos o ano futuro "vazio"
 // Função para gerar o HTML do Esqueleto
 function getSkeletonHtml() {
     // Gera 8 cards vazios com animação
@@ -795,25 +803,27 @@ async function handleSearch(){
 async function loadLeagues(forceRefresh=false,specificYear=null){
     if(forceRefresh) clearCache();
     
-    // Mostra o Esqueleto imediatamente
+    // 1. Chamada do visual de carregamento (Skeleton)
     renderSkeletonScreen();
 
-    // Carrega jogadores se necessário
+    // 2. Carrega base de jogadores se necessário
     if(!Object.keys(players).length){
         try{const r=await fetch(`${API}/players/nfl`);players=await r.json()}catch(e){}
     }
     
     leagues=[];
     
-    // Lógica de Ano
     if(specificYear){
+        // Caso A: Usuário escolheu um ano específico no menu
         try{
             const r=await fetch(`${API}/user/${user.user_id}/leagues/nfl/${specificYear}`);
             const l=await r.json();
             if(l?.length){year=specificYear;leagues=l}
         }catch(e){}
     }else{
-        for(const s of['2026','2025','2024','2023']){
+        // Caso B: Busca automática (Automação de Anos)
+        // Aqui ele usa a lista dinâmica que criamos no Passo 1
+        for(const s of DYNAMIC_YEARS){
             try{
                 const r=await fetch(`${API}/user/${user.user_id}/leagues/nfl/${s}`);
                 const l=await r.json();
@@ -822,15 +832,17 @@ async function loadLeagues(forceRefresh=false,specificYear=null){
         }
     }
     
+    // Se não achou ligas, volta pro login
     if(!leagues.length){renderSearch();showErr(t('noLeagues'));return}
     
-    // Atualiza o texto de carregamento mantendo os esqueletos
+    // Atualiza o texto de status mantendo o visual Skeleton
     const statusDiv = document.querySelector('.search-section div:last-child');
     if(statusDiv) statusDiv.textContent = `${t('loadingDetails')} (${leagues.length})...`;
 
-    // Carrega detalhes em lotes
+    // Carrega os detalhes das ligas em lotes
     for(let i=0;i<leagues.length;i+=5){await Promise.all(leagues.slice(i,i+5).map(loadDetails))}
     
+    // Salva e renderiza
     setCache({userId:user.user_id,players,leagues,year});
     renderDash();
 }
@@ -1285,7 +1297,13 @@ function renderDash(){
     const hasDyn=leagues.some(l=>getType(l)==='dynasty');
     const cache=getCache();
     const dateLang=lang==='en'?'en-US':lang==='es'?'es-ES':'pt-BR';
-    const cacheTime=cache?new Date(cache.timestamp).toLocaleTimeString(dateLang,{hour:'2-digit',minute:'2-digit'}):'';    
+    const cacheTime=cache?new Date(cache.timestamp).toLocaleTimeString(dateLang,{hour:'2-digit',minute:'2-digit'}):'';      
+    
+    // --- LÓGICA NOVA: Cria as opções do menu de anos automaticamente ---
+    const yearOptions = DYNAMIC_YEARS.map(y => 
+        `<option value="${y}" ${year===y?'selected':''}>${y}</option>`
+    ).join('');
+    
     let panelHtml='';
     if(showPanel==='injury')panelHtml=renderInjuryPanel();
     else if(showPanel==='matchups')panelHtml=renderMatchupsPanel();
@@ -1360,12 +1378,11 @@ function renderDash(){
                 <option value="LB" ${positionFilter==='LB'?'selected':''}>LB</option>
                 <option value="DB" ${positionFilter==='DB'?'selected':''}>DB</option>
             </select>
+            
             <select class="mini-select" onchange="loadLeagues(true,this.value)">
-                <option value="2026" ${year==='2026'?'selected':''}>2026</option>
-                <option value="2025" ${year==='2025'?'selected':''}>2025</option>
-                <option value="2024" ${year==='2024'?'selected':''}>2024</option>
-                <option value="2023" ${year==='2023'?'selected':''}>2023</option>
+                ${yearOptions}
             </select>
+            
             <button class="icon-btn" onclick="exportAllRosters()" title="${t('exportAll')}" style="font-size:.8rem">📥</button>
             <div class="view-toggle">
                 <button class="view-btn ${view==='cards'?'active':''}" onclick="view='cards';renderDash()">${t('cards')}</button>
@@ -1382,7 +1399,7 @@ function renderDash(){
         <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener" class="coffee-btn">☕ Buy me a coffee</a>
     </div>`;
 }
-
+        
 function getLineup(l){const rp=l.roster_positions||[];const c={};const ord=['QB','RB','WR','TE','FLEX','SUPER_FLEX','REC_FLEX','K','DL','LB','DB','IDP_FLEX'];rp.forEach(p=>{if(p!=='BN')c[p]=(c[p]||0)+1});const s=[];ord.forEach(p=>{if(c[p]){const lb=p==='SUPER_FLEX'?'SF':p==='REC_FLEX'?'RF':p==='IDP_FLEX'?'IDP':p;s.push({pos:p,count:c[p],label:c[p]>1?`${c[p]}${lb}`:lb})}});return s}
 
 function getAge(p){if(!p?.birth_date)return null;const birth=new Date(p.birth_date);const today=new Date();let age=today.getFullYear()-birth.getFullYear();const m=today.getMonth()-birth.getMonth();if(m<0||(m===0&&today.getDate()<birth.getDate()))age--;return age}
