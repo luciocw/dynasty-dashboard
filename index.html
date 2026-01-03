@@ -13,14 +13,14 @@
     <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Dynasty%20Dashboard%22%2C%22short_name%22%3A%22Dynasty%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231a1d21%22%2C%22theme_color%22%3A%22%231a1d21%22%7D">
     <style>
         *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-        :root{--bg-primary:#1a1d21;--bg-secondary:#23272e;--bg-card:#2a2f38;--bg-hover:#343a45;--text-primary:#e8eaed;--text-secondary:#9aa0a6;--accent:#5c9eff;--accent-hover:#4a8af0;--accent-muted:rgba(92,158,255,0.15);--success:#34a853;--success-muted:rgba(52,168,83,0.15);--warning:#f9ab00;--warning-muted:rgba(249,171,0,0.15);--error:#ea4335;--error-muted:rgba(234,67,53,0.15);--dynasty:#a185f7;--dynasty-muted:rgba(161,133,247,0.15);--redraft:#4ade80;--redraft-muted:rgba(74,222,128,0.15);--keeper:#fbbf24;--keeper-muted:rgba(251,191,36,0.15);--border:#3c4149;--shadow:0 2px 8px rgba(0,0,0,0.3);
+        :root{--bg-primary:#1a1d21;--bg-secondary:#23272e;--bg-card:#2a2f38;--bg-hover:#343a45;--text-primary:#e8eaed;--text-secondary:#9aa0a6;--accent:#5c9eff;--accent-hover:#4a8af0;--accent-muted:rgba(92,158,255,0.15);--success:#34a853;--success-muted:rgba(52,168,83,0.15);--warning:#f9ab00;--warning-muted:rgba(249,171,0,0.15);--error:#ea4335;--error-muted:rgba(234,67,53,0.15);--dynasty:#a185f7;--dynasty-muted:rgba(161,133,247,0.15);--redraft:#4ade80;--redraft-muted:rgba(74,222,128,0.15);--keeper:#fbbf24;--keeper-muted:rgba(251,191,36,0.15);--border:#3c4149;--shadow:0 2px 8px rgba(0,0,0,0.3);--trending:#ff6b6b;--trending-muted:rgba(255,107,107,0.15);
         /* MOBILE FIX 2: Variáveis para Safe Area (Notch do iPhone) */
         --safe-top: env(safe-area-inset-top, 0px);
         --safe-bottom: env(safe-area-inset-bottom, 0px);
         --safe-left: env(safe-area-inset-left, 0px);
         --safe-right: env(safe-area-inset-right, 0px);
         }
-        [data-theme="light"]{--bg-primary:#f8f9fa;--bg-secondary:#ffffff;--bg-card:#f1f3f4;--bg-hover:#e8eaed;--text-primary:#202124;--text-secondary:#5f6368;--accent:#1a73e8;--accent-hover:#1557b0;--accent-muted:rgba(26,115,232,0.1);--success:#188038;--success-muted:rgba(24,128,56,0.1);--warning:#e37400;--warning-muted:rgba(227,116,0,0.1);--error:#d93025;--error-muted:rgba(217,48,37,0.1);--dynasty:#7c4dff;--dynasty-muted:rgba(124,77,255,0.1);--redraft:#0d904f;--redraft-muted:rgba(13,144,79,0.1);--keeper:#b45309;--keeper-muted:rgba(180,83,9,0.1);--border:#dadce0;--shadow:0 1px 3px rgba(60,64,67,0.15)}
+        [data-theme="light"]{--bg-primary:#f8f9fa;--bg-secondary:#ffffff;--bg-card:#f1f3f4;--bg-hover:#e8eaed;--text-primary:#202124;--text-secondary:#5f6368;--accent:#1a73e8;--accent-hover:#1557b0;--accent-muted:rgba(26,115,232,0.1);--success:#188038;--success-muted:rgba(24,128,56,0.1);--warning:#e37400;--warning-muted:rgba(227,116,0,0.1);--error:#d93025;--error-muted:rgba(217,48,37,0.1);--dynasty:#7c4dff;--dynasty-muted:rgba(124,77,255,0.1);--redraft:#0d904f;--redraft-muted:rgba(13,144,79,0.1);--keeper:#b45309;--keeper-muted:rgba(180,83,9,0.1);--border:#dadce0;--shadow:0 1px 3px rgba(60,64,67,0.15);--trending:#e53935;--trending-muted:rgba(229,57,53,0.1)}
         
         body{
             font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
@@ -453,7 +453,29 @@
         .sk-line.short { width: 60%; }
         .sk-line.mini { width: 30%; }
         .sk-body { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
-        .sk-row { display: flex; gap: 0.5rem; align-items: center; }  
+        .sk-row { display: flex; gap: 0.5rem; align-items: center; }
+        
+        /* ========== TRENDING PANEL ========== */
+        .trending-tabs{display:flex;gap:.5rem;margin-bottom:.75rem}
+        .trending-tab{padding:.4rem .75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;font-size:.75rem;cursor:pointer;transition:all .2s}
+        .trending-tab:hover{border-color:var(--accent)}
+        .trending-tab.active{background:var(--trending);border-color:var(--trending);color:white}
+        .trending-tab.active.drops{background:var(--error);border-color:var(--error)}
+        .trending-filters{display:flex;gap:.5rem;align-items:center;margin-bottom:.75rem}
+        .trending-list{display:flex;flex-direction:column;gap:.5rem;max-height:400px;overflow-y:auto}
+        .trending-item{display:flex;align-items:center;gap:.75rem;padding:.6rem .75rem;background:var(--bg-card);border-radius:8px;border-left:3px solid var(--trending)}
+        .trending-item.drop{border-left-color:var(--error)}
+        .trending-rank{font-size:1rem;font-weight:700;color:var(--trending);min-width:1.5rem;text-align:center}
+        .trending-item.drop .trending-rank{color:var(--error)}
+        .trending-player-info{flex:1;min-width:0}
+        .trending-player-name{font-weight:600;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .trending-player-meta{display:flex;gap:.5rem;align-items:center;margin-top:.15rem}
+        .trending-count{background:var(--trending-muted);color:var(--trending);padding:.2rem .5rem;border-radius:4px;font-size:.7rem;font-weight:600}
+        .trending-item.drop .trending-count{background:var(--error-muted);color:var(--error)}
+        .trending-ownership{font-size:.7rem;color:var(--text-secondary);margin-top:.25rem}
+        .trending-ownership .owned{color:var(--success);font-weight:500}
+        .trending-ownership .available{color:var(--accent)}
+        .trending-updated{font-size:.65rem;color:var(--text-secondary);margin-top:.5rem;text-align:center}
     </style>
 </head>
 <body>
@@ -563,7 +585,7 @@ const i18n = {
         history: 'Histórico',
         titles: 'Títulos',
         avgAge: 'Idade Média',
-        champion: 'Campeón',
+        champion: 'Campeão',
         runnerUp: 'Vice',
         thirdPlace: '3º Lugar',
         place: 'º Lugar',
@@ -586,7 +608,17 @@ const i18n = {
         exportAll: 'Exportar Todos',
         codedBy: 'programado por',
         age: 'anos',
-        lang: '🇧🇷'
+        lang: '🇧🇷',
+        // Trending
+        trending: 'Trending',
+        trendingAdds: 'Adds',
+        trendingDrops: 'Drops',
+        trendingHours: 'horas', // 'hours' em inglês
+        trendingCount: 'movimentações', // 'moves' em inglês
+        trendingOwned: 'Você tem em', // 'You own in' em inglês
+        trendingAvailable: 'Disponível em', // 'Available in' em inglês
+        trendingLeagues: 'ligas', // 'leagues' em inglês
+        trendingUpdated: 'Dados das últimas', // 'Data from last' em inglês
     },
     'en': {
         title: 'Dynasty Dashboard',
@@ -684,7 +716,17 @@ const i18n = {
         exportedOn: 'Exported on',
         exportAll: 'Export All',
         age: 'y/o',
-        lang: '🇺🇸'
+        lang: '🇺🇸',
+        // Trending
+        trending: 'Trending',
+        trendingAdds: 'Adds',
+        trendingDrops: 'Drops',
+        trendingHours: 'hours',
+        trendingCount: 'moves',
+        trendingOwned: 'You own in',
+        trendingAvailable: 'Available in',
+        trendingLeagues: 'leagues',
+        trendingUpdated: 'Data from last'
     },
     'es': {
         title: 'Dynasty Dashboard',
@@ -782,7 +824,17 @@ const i18n = {
         exportedOn: 'Exportado en',
         exportAll: 'Exportar Todos',
         age: 'años',
-        lang: '🇪🇸'
+        lang: '🇪🇸',
+        // Trending
+        trending: 'Trending',
+        trendingAdds: 'Adds',
+        trendingDrops: 'Drops',
+        trendingHours: 'horas',
+        trendingCount: 'movimientos',
+        trendingOwned: 'Lo tienes en',
+        trendingAvailable: 'Disponible en',
+        trendingLeagues: 'ligas',
+        trendingUpdated: 'Datos de las últimas'
     }
 };
 
@@ -790,10 +842,35 @@ let lang = 'pt-BR';
 function t(key) { return i18n[lang]?.[key] || i18n['en'][key] || key; }
 function setLang(l) { lang = l; localStorage.setItem(CONFIG.LANG_KEY, l); renderDash(); }
 function initLang() { const saved = localStorage.getItem(CONFIG.LANG_KEY); if (saved && i18n[saved]) lang = saved; }
+        // ========== NFL State API ==========
+async function loadNflState() {
+    try {
+        const r = await fetch(`${API}/state/nfl`);
+        nflState = await r.json();
+        return nflState;
+    } catch(e) {
+        console.error('Failed to load NFL state:', e);
+        return null;
+    }
+}
+
+function isOffseason() {
+    if (nflState?.season_type) {
+        return nflState.season_type === 'off' || nflState.season_type === 'post';
+    }
+    return false;
+}
 
 let players={},user=null,leagues=[],matchups={},transactions={},seasonHistory={};
 let filter='all',view='cards',year='2025',theme='dark',sortBy='name',playerSearch='',positionFilter='all';
 let showPanel=null,selectedLeague=null,showCapitalDetails=false,compareLeagues=[null,null,null];
+        // NEW: NFL State from API
+let nflState = null;
+
+// NEW: Trending data
+let trendingData = { adds: [], drops: [] };
+let trendingType = 'add';
+let trendingHours = 24;
 const posOrder=['QB','RB','WR','TE','K','DEF','DL','LB','DB'];
 const byeWeeks={'ARI':14,'ATL':12,'BAL':14,'BUF':12,'CAR':7,'CHI':7,'CIN':8,'CLE':6,'DAL':7,'DEN':14,'DET':5,'GB':10,'HOU':14,'IND':14,'JAX':12,'KC':6,'LAC':5,'LAR':6,'LV':10,'MIA':6,'MIN':10,'NE':14,'NO':12,'NYG':11,'NYJ':12,'PHI':5,'PIT':9,'SEA':10,'SF':9,'TB':11,'TEN':5,'WAS':14};
 
@@ -884,7 +961,12 @@ function toggleTheme(){theme=theme==='dark'?'light':'dark';localStorage.setItem(
 async function init(){
     initTheme();
     initLang();
+    
+    // Load NFL state first (NEW)
+    await loadNflState();
+    
     const s=localStorage.getItem(CONFIG.USER_KEY);
+    // ... resto continua igual
     if(s){
         try{
             user=JSON.parse(s);
@@ -927,7 +1009,7 @@ function renderSearch(){
     </div>
     
     <div class="footer">
-        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.8.0<br>
+        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.9.0<br>
         ${t('developedBy')} <strong>Lucio</strong>, ${t('codedBy')} <strong>Claude</strong> • <a href="https://x.com/luciocw" target="_blank" rel="noopener" class="twitter-link">𝕏 @luciocw</a><br>
         <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener" class="coffee-btn">☕ Buy me a coffee</a>
     </div>`;
@@ -1040,7 +1122,17 @@ async function loadTransactions(leagueId){
     }
 }
 
-function getCurrentWeek(){const now=new Date();const seasonStart=new Date('2025-09-04');if(now<seasonStart)return 1;return Math.min(18,Math.ceil((now-seasonStart)/(7*24*60*60*1000)))}
+function getCurrentWeek() {
+    // Use API data if available
+    if (nflState?.week) {
+        return nflState.week;
+    }
+    // Fallback to calculation
+    const now = new Date();
+    const seasonStart = new Date('2025-09-04');
+    if (now < seasonStart) return 1;
+    return Math.min(18, Math.ceil((now - seasonStart) / (7 * 24 * 60 * 60 * 1000)));
+}
 function showLoad(m){document.getElementById('app').innerHTML=`<header><h1>🏈 ${t('title')}</h1><button class="icon-btn" onclick="toggleTheme()">${theme==='dark'?'☀️':'🌙'}</button></header><div class="loading"><div class="spinner"></div><div>${m}</div></div>`}
 function showErr(m){const d=document.createElement('div');d.className='error-message';d.textContent=m;document.querySelector('.search-section')?.appendChild(d)}
 function logout(){localStorage.removeItem(CONFIG.USER_KEY);clearCache();user=null;leagues=[];renderSearch()}
@@ -1164,7 +1256,14 @@ function getDraftCapital(){
 function getByeData(lid){const l=leagues.find(x=>x.league_id===lid);if(!l)return{};const wd={};for(let w=1;w<=18;w++)wd[w]=[];(l.myRoster?.players||[]).forEach(id=>{const p=players[id];if(p?.team&&byeWeeks[p.team])wd[byeWeeks[p.team]].push({name:p.full_name,pos:p.position,team:p.team})});return wd}
 
 // Panel toggles
-function togglePanel(p){showPanel=showPanel===p?null:p;if(p==='matchups'&&!Object.keys(matchups).length)loadMatchups();else if(p==='trades'&&selectedLeague)loadTransactions(selectedLeague).then(renderDash);else if(p==='history'&&!Object.keys(seasonHistory).length){renderDash();loadSeasonHistory()}else renderDash()}
+function togglePanel(p){
+    showPanel=showPanel===p?null:p;
+    if(p==='matchups'&&!Object.keys(matchups).length) loadMatchups();
+    else if(p==='trades'&&selectedLeague) loadTransactions(selectedLeague).then(renderDash);
+    else if(p==='history'&&!Object.keys(seasonHistory).length){renderDash();loadSeasonHistory()}
+    else if(p==='trending'&&trendingData.adds.length===0) loadTrendingPlayers('add', trendingHours).then(renderDash);
+    else renderDash();
+}
 function setSelectedLeague(id){selectedLeague=id;if(showPanel==='trades')loadTransactions(id).then(renderDash);else if(showPanel==='rankings'||showPanel==='bye')renderDash()}
 
 // Render panels
@@ -1455,6 +1554,110 @@ function renderExposurePanel(){
 }
 
 // Main render
+        // ========== Trending Players ==========
+async function loadTrendingPlayers(type = 'add', hours = 24) {
+    try {
+        const r = await fetch(`${API}/players/nfl/trending/${type}?lookback_hours=${hours}&limit=25`);
+        const data = await r.json();
+        if (type === 'add') {
+            trendingData.adds = data;
+        } else {
+            trendingData.drops = data;
+        }
+        return data;
+    } catch(e) {
+        console.error('Failed to load trending:', e);
+        return [];
+    }
+}
+
+function getTrendingOwnership(playerId) {
+    const owned = [];
+    const available = [];
+    
+    leagues.forEach(l => {
+        const rosterPlayers = l.myRoster?.players || [];
+        if (rosterPlayers.includes(playerId)) {
+            owned.push(l.name);
+        } else {
+            available.push(l.name);
+        }
+    });
+    
+    return { owned, available };
+}
+
+function renderTrendingPanel() {
+    const data = trendingType === 'add' ? trendingData.adds : trendingData.drops;
+    const isLoading = data.length === 0;
+    
+    let content = '';
+    if (isLoading) {
+        content = `<div class="loading"><div class="spinner"></div></div>`;
+    } else {
+        content = `<div class="trending-list">${data.map((item, i) => {
+            const p = players[item.player_id];
+            if (!p) return '';
+            
+            const ownership = getTrendingOwnership(item.player_id);
+            const pos = normalizePosition(p.position);
+            
+            let ownershipHtml = '';
+            if (ownership.owned.length > 0) {
+                ownershipHtml = `<div class="trending-ownership"><span class="owned">✓ ${t('trendingOwned')} ${ownership.owned.length} ${t('trendingLeagues')}</span></div>`;
+            } else if (ownership.available.length > 0) {
+                ownershipHtml = `<div class="trending-ownership"><span class="available">${t('trendingAvailable')} ${ownership.available.length} ${t('trendingLeagues')}</span></div>`;
+            }
+            
+            return `<div class="trending-item ${trendingType === 'drop' ? 'drop' : ''}">
+                <span class="trending-rank">${i + 1}</span>
+                <span class="player-pos pos-${pos.toLowerCase()}">${p.position || '?'}</span>
+                <div class="trending-player-info">
+                    <div class="trending-player-name">${escapeHtml(p.full_name || 'Unknown')}</div>
+                    <div class="trending-player-meta">
+                        <span class="player-team">${p.team || 'FA'}</span>
+                        <span class="trending-count">${trendingType === 'add' ? '+' : '-'}${item.count.toLocaleString()}</span>
+                    </div>
+                    ${ownershipHtml}
+                </div>
+            </div>`;
+        }).join('')}</div>
+        <div class="trending-updated">💡 ${t('trendingUpdated')} ${trendingHours} ${t('trendingHours')}</div>`;
+    }
+    
+    return `<div class="panel show">
+        <div class="panel-header">
+            <div class="panel-title">🔥 ${t('trending')}</div>
+            <button class="panel-close" onclick="togglePanel(null)">×</button>
+        </div>
+        <div class="trending-tabs">
+            <button class="trending-tab ${trendingType === 'add' ? 'active' : ''}" onclick="setTrendingType('add')">➕ ${t('trendingAdds')}</button>
+            <button class="trending-tab ${trendingType === 'drop' ? 'active drops' : ''}" onclick="setTrendingType('drop')">➖ ${t('trendingDrops')}</button>
+        </div>
+        <div class="trending-filters">
+            <select class="mini-select" onchange="setTrendingHours(this.value)">
+                <option value="24" ${trendingHours === 24 ? 'selected' : ''}>24h</option>
+                <option value="48" ${trendingHours === 48 ? 'selected' : ''}>48h</option>
+                <option value="168" ${trendingHours === 168 ? 'selected' : ''}>7d</option>
+            </select>
+        </div>
+        ${content}
+    </div>`;
+}
+
+async function setTrendingType(type) {
+    trendingType = type;
+    renderDash();
+    await loadTrendingPlayers(type, trendingHours);
+    renderDash();
+}
+
+async function setTrendingHours(hours) {
+    trendingHours = parseInt(hours);
+    renderDash();
+    await loadTrendingPlayers(trendingType, trendingHours);
+    renderDash();
+}
 function renderDash(){
     const st=getStats(),ls=getFiltered();
     const inj=getInjuredPlayers();
@@ -1474,6 +1677,7 @@ function renderDash(){
     else if(showPanel==='trades')panelHtml=renderTradesPanel();
     else if(showPanel==='standings')panelHtml=renderStandingsPanel();
     else if(showPanel==='history')panelHtml=renderHistoryPanel();
+    else if(showPanel==='trending')panelHtml=renderTrendingPanel();
     else if(showPanel==='bye')panelHtml=renderByePanel();
     else if(showPanel==='capital')panelHtml=renderCapitalPanel();
     else if(showPanel==='exposure')panelHtml=renderExposurePanel();
@@ -1490,14 +1694,15 @@ function renderDash(){
         </div>
     </header>
     
-    <div class="tools-bar">
+   <div class="tools-bar">
         <div class="tool-chip ${showPanel==='matchups'?'active':''}" onclick="togglePanel('matchups')"><span class="chip-icon">🏈</span>${t('matchups')}</div>
-        ${hasDyn?`<div class="tool-chip ${showPanel==='trades'?'active':''}" onclick="togglePanel('trades')"><span class="chip-icon">🔄</span>${t('trades')}</div>`:''}
-        ${hasDyn?`<div class="tool-chip ${showPanel==='capital'?'active':''}" onclick="togglePanel('capital')"><span class="chip-icon">📋</span>${t('draftPicks')}</div>`:''}
         <div class="tool-chip ${showPanel==='standings'?'active':''}" onclick="togglePanel('standings')"><span class="chip-icon">📊</span>${t('standings')}</div>
-        <div class="tool-chip ${showPanel==='history'?'active':''}" onclick="togglePanel('history')"><span class="chip-icon">📜</span>${t('history')}</div>
+        <div class="tool-chip ${showPanel==='trending'?'active':''}" onclick="togglePanel('trending')"><span class="chip-icon">🔥</span>${t('trending')}</div>
         <div class="tool-chip ${showPanel==='bye'?'active':''}" onclick="togglePanel('bye')"><span class="chip-icon">📅</span>${t('byeWeeks')}</div>
         <div class="tool-chip ${showPanel==='exposure'?'active':''}" onclick="togglePanel('exposure')"><span class="chip-icon">📈</span>${t('exposure')}</div>
+        ${hasDyn?`<div class="tool-chip ${showPanel==='trades'?'active':''}" onclick="togglePanel('trades')"><span class="chip-icon">🔄</span>${t('trades')}</div>`:''}
+        ${hasDyn?`<div class="tool-chip ${showPanel==='capital'?'active':''}" onclick="togglePanel('capital')"><span class="chip-icon">📋</span>${t('draftPicks')}</div>`:''}
+        <div class="tool-chip ${showPanel==='history'?'active':''}" onclick="togglePanel('history')"><span class="chip-icon">📜</span>${t('history')}</div>
     </div>
     
     ${panelHtml}
@@ -1558,7 +1763,7 @@ function renderDash(){
     <div class="leagues-grid ${view}">${ls.map(l=>renderCard(l)).join('')}</div>
     
     <div class="footer">
-        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.8.0<br>
+        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.9.0<br>
         ${t('developedBy')} <strong>Lucio</strong>, ${t('codedBy')} <strong>Claude</strong> • <a href="https://x.com/luciocw" target="_blank" rel="noopener" class="twitter-link">𝕏 @luciocw</a><br>
         <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener" class="coffee-btn">☕ Buy me a coffee</a>
     </div>`;
