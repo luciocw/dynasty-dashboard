@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <title>Dynasty Dashboard - Sleeper</title>
     <meta name="description" content="Visualize todas suas ligas Sleeper de Fantasy Football">
     <meta name="theme-color" content="#1a1d21">
@@ -12,21 +12,49 @@
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231a1d21' width='100' height='100'/><text y='.9em' font-size='90' x='5'>🏈</text></svg>">
     <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Dynasty%20Dashboard%22%2C%22short_name%22%3A%22Dynasty%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231a1d21%22%2C%22theme_color%22%3A%22%231a1d21%22%7D">
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        :root{--bg-primary:#1a1d21;--bg-secondary:#23272e;--bg-card:#2a2f38;--bg-hover:#343a45;--text-primary:#e8eaed;--text-secondary:#9aa0a6;--accent:#5c9eff;--accent-hover:#4a8af0;--accent-muted:rgba(92,158,255,0.15);--success:#34a853;--success-muted:rgba(52,168,83,0.15);--warning:#f9ab00;--warning-muted:rgba(249,171,0,0.15);--error:#ea4335;--error-muted:rgba(234,67,53,0.15);--dynasty:#a185f7;--dynasty-muted:rgba(161,133,247,0.15);--redraft:#4ade80;--redraft-muted:rgba(74,222,128,0.15);--keeper:#fbbf24;--keeper-muted:rgba(251,191,36,0.15);--border:#3c4149;--shadow:0 2px 8px rgba(0,0,0,0.3)}
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        :root{--bg-primary:#1a1d21;--bg-secondary:#23272e;--bg-card:#2a2f38;--bg-hover:#343a45;--text-primary:#e8eaed;--text-secondary:#9aa0a6;--accent:#5c9eff;--accent-hover:#4a8af0;--accent-muted:rgba(92,158,255,0.15);--success:#34a853;--success-muted:rgba(52,168,83,0.15);--warning:#f9ab00;--warning-muted:rgba(249,171,0,0.15);--error:#ea4335;--error-muted:rgba(234,67,53,0.15);--dynasty:#a185f7;--dynasty-muted:rgba(161,133,247,0.15);--redraft:#4ade80;--redraft-muted:rgba(74,222,128,0.15);--keeper:#fbbf24;--keeper-muted:rgba(251,191,36,0.15);--border:#3c4149;--shadow:0 2px 8px rgba(0,0,0,0.3);
+        /* MOBILE FIX 2: Variáveis para Safe Area (Notch do iPhone) */
+        --safe-top: env(safe-area-inset-top, 0px);
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+        --safe-left: env(safe-area-inset-left, 0px);
+        --safe-right: env(safe-area-inset-right, 0px);
+        }
         [data-theme="light"]{--bg-primary:#f8f9fa;--bg-secondary:#ffffff;--bg-card:#f1f3f4;--bg-hover:#e8eaed;--text-primary:#202124;--text-secondary:#5f6368;--accent:#1a73e8;--accent-hover:#1557b0;--accent-muted:rgba(26,115,232,0.1);--success:#188038;--success-muted:rgba(24,128,56,0.1);--warning:#e37400;--warning-muted:rgba(227,116,0,0.1);--error:#d93025;--error-muted:rgba(217,48,37,0.1);--dynasty:#7c4dff;--dynasty-muted:rgba(124,77,255,0.1);--redraft:#0d904f;--redraft-muted:rgba(13,144,79,0.1);--keeper:#b45309;--keeper-muted:rgba(180,83,9,0.1);--border:#dadce0;--shadow:0 1px 3px rgba(60,64,67,0.15)}
-        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;line-height:1.5;transition:background .3s,color .3s}
-        .container{max-width:1800px;margin:0 auto;padding:1.5rem}
+        
+        body{
+            font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+            background:var(--bg-primary);
+            color:var(--text-primary);
+            min-height:100vh;
+            /* MOBILE FIX 3: Usar dvh (dynamic viewport height) evita problemas com barra de endereço móvel */
+            min-height: 100dvh;
+            line-height:1.5;
+            transition:background .3s,color .3s;
+            /* MOBILE FIX 4: Melhorar scroll no iOS */
+            -webkit-overflow-scrolling: touch;
+            /* Evita zoom duplo em alguns browsers */
+            touch-action: manipulation;
+        }
+
+        /* MOBILE FIX 5: Padding lateral respeitando Notch + padding padrão */
+        .container{
+            max-width:1800px;
+            margin:0 auto;
+            padding: max(1.5rem, var(--safe-top) + 1rem) max(1rem, var(--safe-right)) max(1.5rem, var(--safe-bottom)) max(1rem, var(--safe-left));
+        }
+        
         header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
         h1{font-size:1.4rem;font-weight:600;display:flex;align-items:center;gap:.5rem}
         .header-right{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+        
         .icon-btn{background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-secondary);padding:.5rem;border-radius:8px;cursor:pointer;font-size:1rem;transition:all .2s;width:36px;height:36px;display:flex;align-items:center;justify-content:center}
         .icon-btn:hover{border-color:var(--accent);color:var(--accent)}
         .icon-btn.active{background:var(--accent);border-color:var(--accent);color:white}
         .icon-btn.danger{color:var(--error)}
         .icon-btn .badge{position:absolute;top:-4px;right:-4px;background:var(--error);color:white;font-size:.6rem;padding:2px 5px;border-radius:10px;font-weight:600}
         
-        /* UX IMPROVEMENT: Focus States (A11y) */
+        /* A11y Focus States */
         .icon-btn:focus-visible, .filter-btn:focus-visible, .tool-chip:focus-visible, input:focus-visible, select:focus-visible, button:focus-visible {
             outline: 2px solid var(--accent);
             outline-offset: 2px;
@@ -62,7 +90,7 @@
         .panel.show{display:block}
         .panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
         .panel-title{font-size:.9rem;font-weight:600;display:flex;align-items:center;gap:.5rem}
-        .panel-close{background:none;border:none;color:var(--text-secondary);font-size:1.1rem;cursor:pointer}
+        .panel-close{background:none;border:none;color:var(--text-secondary);font-size:1.1rem;cursor:pointer; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;}
         .panel-close:hover{color:var(--error)}
         
         /* Injury Alert Panel */
@@ -219,7 +247,7 @@
         .league-card:hover{border-color:var(--accent)}
         .league-card.highlight{border-color:var(--success);box-shadow:0 0 0 2px var(--success-muted)}
         
-        /* STICKY HEADER IMPLEMENTATION */
+        /* STICKY HEADER IMPLEMENTATION + SAFE AREA SUPPORT */
         .league-header{
             padding:.75rem;
             display:flex;
@@ -228,6 +256,7 @@
             gap:.5rem;
             border-bottom:1px solid var(--border);
             position: sticky;
+            /* MOBILE FIX 6: Sticky header não pode ficar embaixo do notch se scrollar */
             top: 0;
             z-index: 10;
             background: var(--bg-secondary);
@@ -324,13 +353,12 @@
         .twitter-link{color:var(--accent);text-decoration:none;font-weight:500}.twitter-link:hover{text-decoration:underline}
         .coffee-btn:hover{transform:translateY(-2px)}
         
-        .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;padding:1rem}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;padding:max(1rem, var(--safe-top)) max(1rem, var(--safe-right)) max(1rem, var(--safe-bottom)) max(1rem, var(--safe-left));}
         .modal-overlay.active{display:flex}
-        .modal{background:var(--bg-secondary);border-radius:12px;padding:1.25rem;max-width:550px;width:100%;max-height:75vh;overflow:auto;border:1px solid var(--border)}
+        .modal{background:var(--bg-secondary);border-radius:12px;padding:1.25rem;max-width:550px;width:100%;max-height:85vh;overflow:auto;border:1px solid var(--border); display: flex; flex-direction: column;}
         .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
         .modal-title{font-size:1rem;font-weight:600}
-        .modal-close{background:none;border:none;color:var(--text-secondary);font-size:1.3rem;cursor:pointer}
-        .modal-content{background:var(--bg-card);border-radius:8px;padding:.75rem;font-family:monospace;font-size:.75rem;white-space:pre-wrap;max-height:45vh;overflow:auto}
+        .modal-content{background:var(--bg-card);border-radius:8px;padding:.75rem;font-family:monospace;font-size:.75rem;white-space:pre-wrap;max-height:50vh;overflow:auto}
         .modal-actions{display:flex;gap:.5rem;margin-top:.75rem}
         .modal-btn{flex:1;padding:.6rem;border-radius:8px;font-size:.85rem;cursor:pointer}
         .modal-btn.primary{background:var(--accent);color:white;border:none}
@@ -339,7 +367,7 @@
         /* IMPROVED TOAST */
         .toast {
             position: fixed;
-            bottom: 2rem;
+            bottom: max(2rem, var(--safe-bottom));
             left: 50%;
             transform: translateX(-50%) translateY(20px);
             background: var(--success);
@@ -362,7 +390,32 @@
         .cache-info{font-size:.7rem;color:var(--text-secondary);margin-left:.5rem}
         .refresh-btn{font-size:.7rem;color:var(--accent);background:none;border:none;cursor:pointer;text-decoration:underline}
         
-        @media(max-width:600px){.container{padding:1rem}.leagues-grid{grid-template-columns:1fr}.stats-bar{grid-template-columns:repeat(2,1fr)}.controls-row{flex-direction:column;align-items:stretch}.controls-right{justify-content:space-between}.matchups-grid{grid-template-columns:1fr}.compare-grid{grid-template-columns:1fr}}
+        /* MOBILE FIX 7: Breakpoints e Ajustes de Toque */
+        @media(max-width:600px){
+            .container{padding-top: max(1rem, var(--safe-top));}
+            .leagues-grid{grid-template-columns:1fr}
+            .stats-bar{grid-template-columns:repeat(2,1fr)}
+            .controls-row{flex-direction:column;align-items:stretch}
+            .controls-right{justify-content:space-between}
+            .matchups-grid{grid-template-columns:1fr}
+            .compare-grid{grid-template-columns:1fr}
+            
+            /* Anti-zoom no iOS para inputs */
+            .mini-select, .player-search, select, input { 
+                font-size: 16px !important; 
+            }
+            
+            /* Melhor área de toque */
+            .icon-btn, .tool-chip, .filter-btn {
+                min-height: 44px;
+                min-width: 44px;
+                justify-content: center;
+            }
+            
+            .header-right {
+                gap: 0.25rem;
+            }
+        }
         
         /* --- SKELETON LOADING --- */
         .skeleton-card {
@@ -529,7 +582,7 @@ const i18n = {
         rosterComplete: 'Roster completo',
         openSlots: 'vagas',
         allRosters: 'Todos os Rosters',
-        exportedOn: 'Exportado em',
+        exportedOn: 'Exportado en',
         exportAll: 'Exportar Todos',
         codedBy: 'programado por',
         age: 'anos',
@@ -874,7 +927,7 @@ function renderSearch(){
     </div>
     
     <div class="footer">
-        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.7.0<br>
+        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.8.0<br>
         ${t('developedBy')} <strong>Lucio</strong>, ${t('codedBy')} <strong>Claude</strong> • <a href="https://x.com/luciocw" target="_blank" rel="noopener" class="twitter-link">𝕏 @luciocw</a><br>
         <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener" class="coffee-btn">☕ Buy me a coffee</a>
     </div>`;
@@ -1505,7 +1558,7 @@ function renderDash(){
     <div class="leagues-grid ${view}">${ls.map(l=>renderCard(l)).join('')}</div>
     
     <div class="footer">
-        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.7.0<br>
+        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.8.0<br>
         ${t('developedBy')} <strong>Lucio</strong>, ${t('codedBy')} <strong>Claude</strong> • <a href="https://x.com/luciocw" target="_blank" rel="noopener" class="twitter-link">𝕏 @luciocw</a><br>
         <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener" class="coffee-btn">☕ Buy me a coffee</a>
     </div>`;
