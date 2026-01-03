@@ -14,7 +14,6 @@
     <style>
         *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
         :root{--bg-primary:#1a1d21;--bg-secondary:#23272e;--bg-card:#2a2f38;--bg-hover:#343a45;--text-primary:#e8eaed;--text-secondary:#9aa0a6;--accent:#5c9eff;--accent-hover:#4a8af0;--accent-muted:rgba(92,158,255,0.15);--success:#34a853;--success-muted:rgba(52,168,83,0.15);--warning:#f9ab00;--warning-muted:rgba(249,171,0,0.15);--error:#ea4335;--error-muted:rgba(234,67,53,0.15);--dynasty:#a185f7;--dynasty-muted:rgba(161,133,247,0.15);--redraft:#4ade80;--redraft-muted:rgba(74,222,128,0.15);--keeper:#fbbf24;--keeper-muted:rgba(251,191,36,0.15);--border:#3c4149;--shadow:0 2px 8px rgba(0,0,0,0.3);--trending:#ff6b6b;--trending-muted:rgba(255,107,107,0.15);
-        /* MOBILE FIX 2: Variáveis para Safe Area (Notch do iPhone) */
         --safe-top: env(safe-area-inset-top, 0px);
         --safe-bottom: env(safe-area-inset-bottom, 0px);
         --safe-left: env(safe-area-inset-left, 0px);
@@ -27,17 +26,13 @@
             background:var(--bg-primary);
             color:var(--text-primary);
             min-height:100vh;
-            /* MOBILE FIX 3: Usar dvh (dynamic viewport height) evita problemas com barra de endereço móvel */
             min-height: 100dvh;
             line-height:1.5;
             transition:background .3s,color .3s;
-            /* MOBILE FIX 4: Melhorar scroll no iOS */
             -webkit-overflow-scrolling: touch;
-            /* Evita zoom duplo em alguns browsers */
             touch-action: manipulation;
         }
 
-        /* MOBILE FIX 5: Padding lateral respeitando Notch + padding padrão */
         .container{
             max-width:1800px;
             margin:0 auto;
@@ -54,7 +49,6 @@
         .icon-btn.danger{color:var(--error)}
         .icon-btn .badge{position:absolute;top:-4px;right:-4px;background:var(--error);color:white;font-size:.6rem;padding:2px 5px;border-radius:10px;font-weight:600}
         
-        /* A11y Focus States */
         .icon-btn:focus-visible, .filter-btn:focus-visible, .tool-chip:focus-visible, input:focus-visible, select:focus-visible, button:focus-visible {
             outline: 2px solid var(--accent);
             outline-offset: 2px;
@@ -85,7 +79,6 @@
         .tool-chip.active{background:var(--accent);border-color:var(--accent);color:white}
         .tool-chip .chip-icon{font-size:.9rem}
         
-        /* Panels */
         .panel{background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1rem;display:none}
         .panel.show{display:block}
         .panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem}
@@ -93,7 +86,6 @@
         .panel-close{background:none;border:none;color:var(--text-secondary);font-size:1.1rem;cursor:pointer; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;}
         .panel-close:hover{color:var(--error)}
         
-        /* Injury Alert Panel */
         .injury-list{display:flex;flex-direction:column;gap:.5rem;max-height:300px;overflow-y:auto}
         .injury-item{display:flex;align-items:center;gap:.75rem;padding:.5rem .75rem;background:var(--bg-card);border-radius:6px;font-size:.8rem}
         .injury-item.out{border-left:3px solid var(--error)}
@@ -106,7 +98,6 @@
         .injury-status.questionable{background:var(--keeper-muted);color:var(--keeper)}
         .injury-league{font-size:.7rem;color:var(--text-secondary)}
         
-        /* Matchups Panel */
         .matchups-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem}
         .matchup-card{background:var(--bg-card);border-radius:8px;padding:.75rem;border-left:3px solid var(--border)}
         .matchup-card.winning{border-left-color:var(--success)}
@@ -122,7 +113,6 @@
         .matchup-vs{color:var(--text-secondary);font-size:.7rem}
         .matchup-status{text-align:center;margin-top:.5rem;font-size:.65rem;color:var(--text-secondary)}
         
-        /* Trades Panel */
         .trades-list{display:flex;flex-direction:column;gap:.75rem;max-height:400px;overflow-y:auto}
         .trade-item{background:var(--bg-card);border-radius:8px;padding:.75rem}
         .trade-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;font-size:.7rem;color:var(--text-secondary)}
@@ -133,7 +123,6 @@
         .trade-asset{padding:.2rem 0;display:flex;align-items:center;gap:.25rem}
         .trade-asset-type{font-size:.6rem;padding:.1rem .3rem;border-radius:3px;background:var(--bg-secondary)}
         
-        /* Power Rankings Panel */
         .rankings-selector{margin-bottom:.75rem}
         .rankings-selector select{padding:.4rem .75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);font-size:.8rem}
         .rankings-list{display:flex;flex-direction:column;gap:.375rem}
@@ -150,7 +139,6 @@
         .ranking-stat{text-align:center}
         .ranking-stat-value{font-weight:600;color:var(--text-primary)}
         
-        /* Standings Panel */
         .standings-list{display:flex;flex-direction:column;gap:.5rem}
         .standings-header-row{display:flex;align-items:center;gap:.5rem;padding:0 .75rem .5rem;font-size:.65rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);margin-bottom:.25rem}
         .standings-header-row span:first-child{width:1rem}
@@ -168,12 +156,10 @@
         .standings-expanded{padding:.5rem;background:var(--bg-secondary);border-top:1px solid var(--border)}
         .standing-item.expanded .standing-header{background:var(--bg-secondary)}
         
-        /* Panel Sections */
         .panel-section{margin-bottom:1rem}
         .panel-section:last-child{margin-bottom:0}
         .panel-subtitle{font-size:.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px}
         
-        /* Exposure Panel */
         .exposure-grid{display:flex;flex-wrap:wrap;gap:.5rem}
         .most-owned-list{display:flex;flex-direction:column;gap:.25rem}
         .most-owned-item{display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;background:var(--bg-secondary);border-radius:6px}
@@ -184,7 +170,6 @@
         .exposure-item{background:var(--bg-card);padding:.4rem .6rem;border-radius:6px;font-size:.75rem;display:flex;align-items:center;gap:.375rem}
         .exposure-pos{font-weight:600;color:var(--accent)}
         
-        /* Capital Panel */
         .capital-summary{display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:.75rem}
         .capital-year{background:var(--bg-card);padding:.6rem .8rem;border-radius:8px;min-width:120px}
         .capital-year-label{font-size:.65rem;color:var(--text-secondary);text-transform:uppercase}
@@ -198,7 +183,6 @@
         .capital-status.poor{background:var(--error-muted);color:var(--error)}
         .capital-status.avg{background:var(--accent-muted);color:var(--accent)}
         
-        /* Bye Week Panel */
         .bye-selector{margin-bottom:.75rem}
         .bye-selector select{padding:.4rem .75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);font-size:.8rem}
         .bye-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:.4rem}
@@ -209,7 +193,6 @@
         .bye-week-count{font-size:1rem;font-weight:600}
         .bye-players{margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border)}
         
-        /* Compare Panel */
         .compare-selector{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem}
         .compare-selector select{padding:.4rem .75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);font-size:.8rem;min-width:140px}
         .compare-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:.75rem}
@@ -219,7 +202,6 @@
         .compare-pos-header{font-size:.65rem;font-weight:600;color:var(--text-secondary);margin-bottom:.25rem}
         .compare-player{font-size:.75rem;padding:.15rem 0}
         
-        /* Controls */
         .controls-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem}
         .filters{display:flex;gap:.375rem;flex-wrap:wrap}
         .filter-btn{padding:.4rem .75rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);font-size:.8rem;cursor:pointer;transition:all .2s}
@@ -236,7 +218,6 @@
         .view-btn{padding:.35rem .6rem;background:transparent;border:none;color:var(--text-secondary);border-radius:4px;cursor:pointer;font-size:.75rem}
         .view-btn.active{background:var(--accent);color:white}
         
-        /* League Cards - WITH STICKY HEADER TWEAK */
         .leagues-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:.75rem}
         .leagues-grid.compact{display:flex;flex-direction:column;gap:.4rem}
         .leagues-grid.compact .league-card{display:grid;grid-template-columns:1fr auto;align-items:center}
@@ -247,7 +228,6 @@
         .league-card:hover{border-color:var(--accent)}
         .league-card.highlight{border-color:var(--success);box-shadow:0 0 0 2px var(--success-muted)}
         
-        /* STICKY HEADER IMPLEMENTATION + SAFE AREA SUPPORT */
         .league-header{
             padding:.75rem;
             display:flex;
@@ -256,7 +236,6 @@
             gap:.5rem;
             border-bottom:1px solid var(--border);
             position: sticky;
-            /* MOBILE FIX 6: Sticky header não pode ficar embaixo do notch se scrollar */
             top: 0;
             z-index: 10;
             background: var(--bg-secondary);
@@ -293,7 +272,6 @@
         .lineup-slot{font-size:.65rem;padding:.15rem .3rem;background:var(--bg-secondary);border-radius:4px}
         .slot-qb{color:var(--error)}.slot-rb{color:var(--success)}.slot-wr{color:var(--accent)}.slot-te{color:var(--warning)}.slot-flex{color:var(--dynasty)}.slot-sf{color:#ec4899}.slot-def{color:var(--text-secondary)}
         
-        /* CUSTOM SCROLLBAR FOR ROSTERS */
         .roster-section{padding:.6rem;max-height:350px;overflow-y:auto}
         .roster-section::-webkit-scrollbar{width:4px}
         .roster-section::-webkit-scrollbar-track{background:transparent}
@@ -364,7 +342,6 @@
         .modal-btn.primary{background:var(--accent);color:white;border:none}
         .modal-btn.secondary{background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border)}
         
-        /* IMPROVED TOAST */
         .toast {
             position: fixed;
             bottom: max(2rem, var(--safe-bottom));
@@ -390,7 +367,6 @@
         .cache-info{font-size:.7rem;color:var(--text-secondary);margin-left:.5rem}
         .refresh-btn{font-size:.7rem;color:var(--accent);background:none;border:none;cursor:pointer;text-decoration:underline}
         
-        /* MOBILE FIX 7: Breakpoints e Ajustes de Toque */
         @media(max-width:600px){
             .container{padding-top: max(1rem, var(--safe-top));}
             .leagues-grid{grid-template-columns:1fr}
@@ -400,12 +376,10 @@
             .matchups-grid{grid-template-columns:1fr}
             .compare-grid{grid-template-columns:1fr}
             
-            /* Anti-zoom no iOS para inputs */
             .mini-select, .player-search, select, input { 
                 font-size: 16px !important; 
             }
             
-            /* Melhor área de toque */
             .icon-btn, .tool-chip, .filter-btn {
                 min-height: 44px;
                 min-width: 44px;
@@ -417,7 +391,6 @@
             }
         }
         
-        /* --- SKELETON LOADING --- */
         .skeleton-card {
             background: var(--bg-secondary);
             border-radius: 10px;
@@ -455,7 +428,6 @@
         .sk-body { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
         .sk-row { display: flex; gap: 0.5rem; align-items: center; }
         
-        /* ========== TRENDING PANEL ========== */
         .trending-tabs{display:flex;gap:.5rem;margin-bottom:.75rem}
         .trending-tab{padding:.4rem .75rem;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;font-size:.75rem;cursor:pointer;transition:all .2s}
         .trending-tab:hover{border-color:var(--accent)}
@@ -499,18 +471,18 @@ const CONFIG = {
     NFL_WEEKS: 18
 };
 
-// --- XSS PROTECTION ---
+// --- SECURITY HOTFIX: ROBUST XSS PROTECTION ---
 function escapeHtml(text) {
-    if (!text) return '';
+    if (text === null || text === undefined) return '';
     return String(text)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(/'/g, "&#039;")
+        .replace(/`/g, "&#96;"); // Added backtick protection
 }
 
-// Internationalization
 const i18n = {
     'pt-BR': {
         title: 'Dynasty Dashboard',
@@ -609,16 +581,15 @@ const i18n = {
         codedBy: 'programado por',
         age: 'anos',
         lang: '🇧🇷',
-        // Trending
         trending: 'Trending',
         trendingAdds: 'Adds',
         trendingDrops: 'Drops',
-        trendingHours: 'horas', // 'hours' em inglês
-        trendingCount: 'movimentações', // 'moves' em inglês
-        trendingOwned: 'Você tem em', // 'You own in' em inglês
-        trendingAvailable: 'Disponível em', // 'Available in' em inglês
-        trendingLeagues: 'ligas', // 'leagues' em inglês
-        trendingUpdated: 'Dados das últimas', // 'Data from last' em inglês
+        trendingHours: 'horas',
+        trendingCount: 'movimentações',
+        trendingOwned: 'Você tem em',
+        trendingAvailable: 'Disponível em',
+        trendingLeagues: 'ligas',
+        trendingUpdated: 'Dados das últimas',
     },
     'en': {
         title: 'Dynasty Dashboard',
@@ -717,7 +688,6 @@ const i18n = {
         exportAll: 'Export All',
         age: 'y/o',
         lang: '🇺🇸',
-        // Trending
         trending: 'Trending',
         trendingAdds: 'Adds',
         trendingDrops: 'Drops',
@@ -825,7 +795,6 @@ const i18n = {
         exportAll: 'Exportar Todos',
         age: 'años',
         lang: '🇪🇸',
-        // Trending
         trending: 'Trending',
         trendingAdds: 'Adds',
         trendingDrops: 'Drops',
@@ -842,7 +811,7 @@ let lang = 'pt-BR';
 function t(key) { return i18n[lang]?.[key] || i18n['en'][key] || key; }
 function setLang(l) { lang = l; localStorage.setItem(CONFIG.LANG_KEY, l); renderDash(); }
 function initLang() { const saved = localStorage.getItem(CONFIG.LANG_KEY); if (saved && i18n[saved]) lang = saved; }
-        // ========== NFL State API ==========
+
 async function loadNflState() {
     try {
         const r = await fetch(`${API}/state/nfl`);
@@ -864,29 +833,23 @@ function isOffseason() {
 let players={},user=null,leagues=[],matchups={},transactions={},seasonHistory={};
 let filter='all',view='cards',year='2025',theme='dark',sortBy='name',playerSearch='',positionFilter='all';
 let showPanel=null,selectedLeague=null,showCapitalDetails=false,compareLeagues=[null,null,null];
-        // NEW: NFL State from API
 let nflState = null;
 
-// NEW: Trending data
 let trendingData = { adds: [], drops: [] };
 let trendingType = 'add';
 let trendingHours = 24;
 const posOrder=['QB','RB','WR','TE','K','DEF','DL','LB','DB'];
 const byeWeeks={'ARI':14,'ATL':12,'BAL':14,'BUF':12,'CAR':7,'CHI':7,'CIN':8,'CLE':6,'DAL':7,'DEN':14,'DET':5,'GB':10,'HOU':14,'IND':14,'JAX':12,'KC':6,'LAC':5,'LAR':6,'LV':10,'MIA':6,'MIN':10,'NE':14,'NO':12,'NYG':11,'NYJ':12,'PHI':5,'PIT':9,'SEA':10,'SF':9,'TB':11,'TEN':5,'WAS':14};
 
-// --- LÓGICA DE ANOS DINÂMICA ---
-const START_YEAR = 2019; // Ano de corte (não busca antes disso)
+const START_YEAR = 2019;
 const CURR_YEAR_SYS = new Date().getFullYear();
-// Gera lista do próximo ano até 2019 (Ex: 2027, 2026, 2025... 2019)
 const DYNAMIC_YEARS = Array.from(
     {length: (CURR_YEAR_SYS + 1) - START_YEAR + 1}, 
     (_, i) => String((CURR_YEAR_SYS + 1) - i)
 );
-const HISTORY_YEARS = DYNAMIC_YEARS.slice(1); // Para histórico, ignoramos o ano futuro "vazio"
+const HISTORY_YEARS = DYNAMIC_YEARS.slice(1);
 
-// Função para gerar o HTML do Esqueleto
 function getSkeletonHtml() {
-    // Gera 8 cards vazios com animação
     return Array(8).fill(0).map(() => `
         <div class="skeleton-card">
             <div class="sk-header">
@@ -903,7 +866,6 @@ function getSkeletonHtml() {
     `).join('');
 }
 
-// Função para mostrar a tela de carregamento com Esqueletos
 function renderSkeletonScreen() {
     document.getElementById('app').innerHTML = `
     <header>
@@ -923,7 +885,6 @@ function renderSkeletonScreen() {
         
 function normalizePosition(pos){if(!pos)return'?';if(['CB','S','FS','SS'].includes(pos))return'DB';if(['DE','DT','NT'].includes(pos))return'DL';if(['OLB','ILB','MLB'].includes(pos))return'LB';return pos;}
 
-// Cache functions (SEC-001 Validation)
 function isValidCache(data) {
     return data && 
            typeof data.timestamp === 'number' && 
@@ -936,14 +897,11 @@ function getCache(){
         const c = localStorage.getItem(CONFIG.CACHE_KEY);
         if(!c) return null;
         const d = JSON.parse(c);
-        
-        // Validação de segurança
         if(!isValidCache(d)) {
             console.warn('Cache inválido detectado. Limpando.');
             clearCache();
             return null;
         }
-
         if(Date.now() - d.timestamp > CONFIG.CACHE_HOURS*60*60*1000) return null;
         return d;
     } catch(e) {
@@ -953,26 +911,19 @@ function getCache(){
 function setCache(data){try{localStorage.setItem(CONFIG.CACHE_KEY,JSON.stringify({...data,timestamp:Date.now()}))}catch(e){}}
 function clearCache(){localStorage.removeItem(CONFIG.CACHE_KEY)}
 
-// Theme
 function initTheme(){const s=localStorage.getItem(CONFIG.THEME_KEY);if(s)theme=s;else if(window.matchMedia?.('(prefers-color-scheme:light)').matches)theme='light';document.documentElement.setAttribute('data-theme',theme)}
 function toggleTheme(){theme=theme==='dark'?'light':'dark';localStorage.setItem(CONFIG.THEME_KEY,theme);document.documentElement.setAttribute('data-theme',theme);renderDash()}
 
-// Init
 async function init(){
     initTheme();
     initLang();
-    
-    // Load NFL state first (NEW)
     await loadNflState();
     
     const s=localStorage.getItem(CONFIG.USER_KEY);
-    // ... resto continua igual
     if(s){
         try{
             user=JSON.parse(s);
-            // Validacao básica do user
             if(!user || !user.user_id) throw new Error("Invalid User");
-
             const cache=getCache();
             if(cache && cache.userId === user.user_id){
                 players=cache.players||{};
@@ -1009,9 +960,9 @@ function renderSearch(){
     </div>
     
     <div class="footer">
-        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.9.0<br>
-        ${t('developedBy')} <strong>Lucio</strong>, ${t('codedBy')} <strong>Claude</strong> • <a href="https://x.com/luciocw" target="_blank" rel="noopener" class="twitter-link">𝕏 @luciocw</a><br>
-        <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener" class="coffee-btn">☕ Buy me a coffee</a>
+        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.9.1 (Hotfix)<br>
+        ${t('developedBy')} <strong>Lucio</strong>, ${t('codedBy')} <strong>Claude</strong> • <a href="https://x.com/luciocw" target="_blank" rel="noopener noreferrer" class="twitter-link">𝕏 @luciocw</a><br>
+        <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener noreferrer" class="coffee-btn">☕ Buy me a coffee</a>
     </div>`;
     
     document.getElementById('usernameInput').addEventListener('keypress',e=>{if(e.key==='Enter')handleSearch()});
@@ -1035,11 +986,8 @@ async function handleSearch(){
 
 async function loadLeagues(forceRefresh=false,specificYear=null){
     if(forceRefresh) clearCache();
-    
-    // 1. Chamada do visual de carregamento (Skeleton)
     renderSkeletonScreen();
 
-    // 2. Carrega base de jogadores se necessário
     if(!Object.keys(players).length){
         try{const r=await fetch(`${API}/players/nfl`);players=await r.json()}catch(e){}
     }
@@ -1047,14 +995,12 @@ async function loadLeagues(forceRefresh=false,specificYear=null){
     leagues=[];
     
     if(specificYear){
-        // Caso A: Usuário escolheu um ano específico no menu
         try{
             const r=await fetch(`${API}/user/${user.user_id}/leagues/nfl/${specificYear}`);
             const l=await r.json();
             if(l?.length){year=specificYear;leagues=l}
         }catch(e){}
     }else{
-        // Caso B: Busca automática (Automação de Anos)
         for(const s of DYNAMIC_YEARS){
             try{
                 const r=await fetch(`${API}/user/${user.user_id}/leagues/nfl/${s}`);
@@ -1064,17 +1010,13 @@ async function loadLeagues(forceRefresh=false,specificYear=null){
         }
     }
     
-    // Se não achou ligas, volta pro login
     if(!leagues.length){renderSearch();showErr(t('noLeagues'));return}
     
-    // Atualiza o texto de status mantendo o visual Skeleton
     const statusDiv = document.querySelector('.search-section div:last-child');
     if(statusDiv) statusDiv.textContent = `${t('loadingDetails')} (${leagues.length})...`;
 
-    // Carrega os detalhes das ligas em lotes
     for(let i=0;i<leagues.length;i+=5){await Promise.all(leagues.slice(i,i+5).map(loadDetails))}
     
-    // Salva e renderiza
     setCache({userId:user.user_id,players,leagues,year});
     renderDash();
 }
@@ -1102,32 +1044,39 @@ async function loadMatchups(){
     renderDash();
 }
 
-// PERF-004: Otimização de Transações (Paralelismo)
+// PERF-004 HOTFIX: API Batching Implementation to prevent rate limiting
 async function loadTransactions(leagueId){
     if(transactions[leagueId]) return;
     try {
-        // Dispara 18 requests simultâneos em vez de um por um
-        const requests = Array.from({length: CONFIG.NFL_WEEKS}, (_, i) => 
-            fetch(`${API}/league/${leagueId}/transactions/${i+1}`)
-                .then(r => r.json())
-                .catch(() => [])
-        );
+        let all = [];
+        const weeks = Array.from({length: CONFIG.NFL_WEEKS}, (_, i) => i + 1);
+        const batchSize = 4; // Fetch 4 weeks at a time
+
+        for (let i = 0; i < weeks.length; i += batchSize) {
+            const batch = weeks.slice(i, i + batchSize);
+            const results = await Promise.all(batch.map(week =>
+                fetch(`${API}/league/${leagueId}/transactions/${week}`)
+                    .then(r => r.ok ? r.json() : [])
+                    .catch(() => [])
+            ));
+            all = all.concat(results.flat());
+            
+            // Tiny delay to be nice to API if there are many batches
+            if(i + batchSize < weeks.length) await new Promise(r => setTimeout(r, 50));
+        }
         
-        const results = await Promise.all(requests);
-        const all = results.flat().filter(x => x.type === 'trade');
-        
-        transactions[leagueId] = all.sort((a,b) => b.created - a.created);
+        const trades = all.filter(x => x.type === 'trade');
+        transactions[leagueId] = trades.sort((a,b) => b.created - a.created);
     } catch(e) {
+        console.error("Trade load error", e);
         transactions[leagueId] = [];
     }
 }
 
 function getCurrentWeek() {
-    // Use API data if available
     if (nflState?.week) {
         return nflState.week;
     }
-    // Fallback to calculation
     const now = new Date();
     const seasonStart = new Date('2025-09-04');
     if (now < seasonStart) return 1;
@@ -1171,7 +1120,6 @@ function getAvgAge(roster){
     return(ages.reduce((a,b)=>a+b,0)/ages.length).toFixed(1);
 }
 
-// Injury alerts
 function getInjuredPlayers(){
     const injured=[];
     leagues.forEach(l=>{
@@ -1186,7 +1134,6 @@ function getInjuredPlayers(){
     return injured.sort((a,b)=>{const order={Out:0,IR:1,Doubtful:2,Questionable:3};return(order[a.injury_status]||4)-(order[b.injury_status]||4)});
 }
 
-// Matchups
 function getMyMatchups(){
     const week=getCurrentWeek();
     const results=[];
@@ -1210,7 +1157,6 @@ function getMyMatchups(){
     return results;
 }
 
-// Power Rankings
 function getPowerRankings(leagueId){
     const l=leagues.find(x=>x.league_id===leagueId);
     if(!l)return[];
@@ -1234,7 +1180,6 @@ function getPowerRankings(leagueId){
     }).sort((a,b)=>b.winPct-a.winPct||b.pf-a.pf);
 }
 
-// Trades
 function getMyTrades(leagueId){
     const l=leagues.find(x=>x.league_id===leagueId);
     const ts=transactions[leagueId]||[];
@@ -1242,7 +1187,6 @@ function getMyTrades(leagueId){
     return ts.filter(t=>t.roster_ids?.includes(myRosterId)).slice(0,20);
 }
 
-// Exposure & Capital (from v1.2)
 function getExposure(){const exp={};leagues.forEach(l=>{(l.myRoster?.players||[]).forEach(id=>{const p=players[id];if(p){const pos=normalizePosition(p.position);exp[pos]=(exp[pos]||0)+1}})});return exp}
 function getDraftCapital(){
     const dyn=leagues.filter(l=>getType(l)==='dynasty');
@@ -1255,7 +1199,6 @@ function getDraftCapital(){
 }
 function getByeData(lid){const l=leagues.find(x=>x.league_id===lid);if(!l)return{};const wd={};for(let w=1;w<=18;w++)wd[w]=[];(l.myRoster?.players||[]).forEach(id=>{const p=players[id];if(p?.team&&byeWeeks[p.team])wd[byeWeeks[p.team]].push({name:p.full_name,pos:p.position,team:p.team})});return wd}
 
-// Panel toggles
 function togglePanel(p){
     showPanel=showPanel===p?null:p;
     if(p==='matchups'&&!Object.keys(matchups).length) loadMatchups();
@@ -1266,7 +1209,6 @@ function togglePanel(p){
 }
 function setSelectedLeague(id){selectedLeague=id;if(showPanel==='trades')loadTransactions(id).then(renderDash);else if(showPanel==='rankings'||showPanel==='bye')renderDash()}
 
-// Render panels
 function renderInjuryPanel(){
     const inj=getInjuredPlayers();
     if(!inj.length)return`<div class="panel show"><div class="panel-header"><div class="panel-title">🏥 ${t('injuryAlerts')}</div><button class="panel-close" onclick="togglePanel(null)">×</button></div><div style="color:var(--text-secondary);font-size:.8rem">${t('noInjuries')}</div></div>`;
@@ -1361,7 +1303,6 @@ function renderStandingsPanel(){
         </div>`}).join('')}</div></div>`;
 }
 
-// Season History Functions
 async function loadSeasonHistory(){
     if(Object.keys(seasonHistory).length)return;
     
@@ -1417,26 +1358,21 @@ function calculateFinalPosition(myRoster,rosters,winners,losers){
     const wins=myRoster.settings?.wins||0;
     const losses=myRoster.settings?.losses||0;
 
-    // --- CORREÇÃO AQUI: Se não houve jogos, retorna posição neutra ---
     if((wins + losses) === 0){
         return {position: totalTeams, label: 'Pre-Season', madePlayoffs: false};
     }
     
-    // Verificar apenas winners_bracket (playoffs do título)
     const inWinnersBracket=winners?.some(m=>m.t1===rosterId||m.t2===rosterId||m.w===rosterId||m.l===rosterId);
     
     if(inWinnersBracket && winners?.length){
-        // Verificar se foi campeão (p:1 e vencedor)
         const champMatch=winners.find(m=>m.p===1);
         if(champMatch?.w===rosterId)return{position:1,label:t('champion'),madePlayoffs:true};
         if(champMatch?.l===rosterId)return{position:2,label:t('runnerUp'),madePlayoffs:true};
         
-        // Verificar 3º lugar
         const thirdMatch=winners.find(m=>m.p===3);
         if(thirdMatch?.w===rosterId)return{position:3,label:t('thirdPlace'),madePlayoffs:true};
         if(thirdMatch?.l===rosterId)return{position:4,label:`4${t('place')}`,madePlayoffs:true};
         
-        // Verificar outras posições definidas no winners bracket
         const myMatches=winners.filter(m=>m.w===rosterId||m.l===rosterId);
         for(const m of myMatches){
             if(m.p){
@@ -1445,14 +1381,11 @@ function calculateFinalPosition(myRoster,rosters,winners,losers){
             }
         }
         
-        // Está no winners bracket mas sem placement específico
         return{position:5,label:'Playoffs',madePlayoffs:true};
     }
     
-    // Não está no winners_bracket = fora dos playoffs de título
     const missedLabel=lang==='en'?'Missed Playoffs':lang==='es'?'Sin Playoffs':'Fora dos Playoffs';
     
-    // Calcular posição na temporada regular para referência
     const sorted=[...rosters].sort((a,b)=>{
         const aWins=a.settings?.wins||0,bWins=b.settings?.wins||0;
         const aPf=a.settings?.fpts||0,bPf=b.settings?.fpts||0;
@@ -1553,8 +1486,6 @@ function renderExposurePanel(){
     <div class="panel-section"><div class="panel-subtitle">${t('byPosition')}</div><div class="exposure-grid">${posOrder.filter(p=>exp[p]).map(p=>`<div class="exposure-item"><span class="exposure-pos">${p}</span><span>${exp[p]}</span></div>`).join('')}</div></div>${mostHtml}</div>`;
 }
 
-// Main render
-        // ========== Trending Players ==========
 async function loadTrendingPlayers(type = 'add', hours = 24) {
     try {
         const r = await fetch(`${API}/players/nfl/trending/${type}?lookback_hours=${hours}&limit=25`);
@@ -1666,7 +1597,6 @@ function renderDash(){
     const dateLang=lang==='en'?'en-US':lang==='es'?'es-ES':'pt-BR';
     const cacheTime=cache?new Date(cache.timestamp).toLocaleTimeString(dateLang,{hour:'2-digit',minute:'2-digit'}):'';      
     
-    // --- LÓGICA NOVA: Cria as opções do menu de anos automaticamente ---
     const yearOptions = DYNAMIC_YEARS.map(y => 
         `<option value="${y}" ${year===y?'selected':''}>${y}</option>`
     ).join('');
@@ -1763,9 +1693,9 @@ function renderDash(){
     <div class="leagues-grid ${view}">${ls.map(l=>renderCard(l)).join('')}</div>
     
     <div class="footer">
-        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.9.0<br>
-        ${t('developedBy')} <strong>Lucio</strong>, ${t('codedBy')} <strong>Claude</strong> • <a href="https://x.com/luciocw" target="_blank" rel="noopener" class="twitter-link">𝕏 @luciocw</a><br>
-        <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener" class="coffee-btn">☕ Buy me a coffee</a>
+        ${t('dataVia')} <a href="https://docs.sleeper.com/" target="_blank">Sleeper API</a> • v1.9.1 (Hotfix)<br>
+        ${t('developedBy')} <strong>Lucio</strong>, ${t('codedBy')} <strong>Claude</strong> • <a href="https://x.com/luciocw" target="_blank" rel="noopener noreferrer" class="twitter-link">𝕏 @luciocw</a><br>
+        <a href="https://buymeacoffee.com/luciocw" target="_blank" rel="noopener noreferrer" class="coffee-btn">☕ Buy me a coffee</a>
     </div>`;
 }
         
